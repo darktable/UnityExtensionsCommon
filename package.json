@@ -5,14 +5,14 @@
   "version": "0.0.1",
   "unity": "2019.3",
   "unityRelease": "0b4",
-  "dependencies": {
-  },
   "author": {
     "name": "Yu Yang",
-    "url" : "https://github.com/yuyang9119"
+    "url": "https://github.com/yuyang9119"
   },
   "keywords": [
     "extensions",
     "common"
-  ]
+  ],
+  "type": "library",
+  "hideInEditor": false
 }
