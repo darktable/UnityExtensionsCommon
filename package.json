@@ -6,20 +6,13 @@
   "unity": "2019.3",
   "unityRelease": "0b4",
   "dependencies": {
-    "com.unity.render-pipelines.core": "7.1.2",
-    "com.unity.shadergraph": "7.1.2"
+  },
+  "author": {
+    "name": "Yu Yang",
+    "url" : "https://github.com/yuyang9119"
   },
   "keywords": [
-    "graphics",
-    "performance",
-    "rendering",
-    "mobile",
-    "render",
-    "pipeline"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:Unity-Technologies/ScriptableRenderPipeline.git",
-    "revision": "c09a7c0290dbb8f4301f1dc06e96bdadc060d4d8"
-  }
+    "extensions",
+    "common"
+  ]
 }
