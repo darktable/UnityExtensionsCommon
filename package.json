@@ -13,5 +13,6 @@
     "extensions",
     "common"
   ],
-  "type": "library"
+  "type": "library",
+  "hideInEditor": false
 }
