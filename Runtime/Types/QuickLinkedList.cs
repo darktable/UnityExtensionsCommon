@@ -17,11 +17,14 @@ namespace UnityExtensions
             public int previous;
             public int next;
             public T value;
+
+            internal bool isAlone => previous == next;
         }
 
 
         Stack<int> _emptyIds;
-        List<Node> _list;
+        Node[] _array;
+        int _arrayCount;
         int _first;
         int _last;
 
@@ -29,19 +32,19 @@ namespace UnityExtensions
         /// <summary>
         /// 链表第一个节点的 id
         /// </summary>
-        public int first { get { return _first; } }
+        public int first => _first;
 
 
         /// <summary>
         /// 链表最后一个节点的 id
         /// </summary>
-        public int last { get { return _last; } }
+        public int last => _last;
 
 
         /// <summary>
         /// 链表节点总数
         /// </summary>
-        public int count { get { return _list.Count - _emptyIds.Count; } }
+        public int count => _arrayCount - _emptyIds.Count;
 
 
         /// <summary>
@@ -51,35 +54,39 @@ namespace UnityExtensions
         {
             get
             {
-                var node = _list[id];
-                if (node.previous == node.next && _first != id)
+                if (_array[id].isAlone && _first != id)
                 {
                     throw new Exception("invalid id");
                 }
 
-                return node.value;
+                return _array[id].value;
             }
             set
             {
-                var node = _list[id];
-                if (node.previous == node.next && _first != id)
+                if (_array[id].isAlone && _first != id)
                 {
                     throw new Exception("invalid id");
                 }
 
-                node.value = value;
-                _list[id] = node;
+                _array[id].value = value;
             }
         }
 
 
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(ref this);
+        }
+
+
         /// <summary>
-        /// 
+        /// 注意：必须通过此构造方法创建 QuickLinkedList 实例
         /// </summary>
         public QuickLinkedList(int capacity)
         {
             _emptyIds = new Stack<int>(4);
-            _list = new List<Node>(capacity);
+            _array = new Node[capacity < 4 ? 4 : capacity];
+            _arrayCount = 0;
             _first = -1;
             _last = -1;
         }
@@ -90,7 +97,7 @@ namespace UnityExtensions
         /// </summary>
         public Node GetNode(int id)
         {
-            return _list[id];
+            return _array[id];
         }
 
 
@@ -99,7 +106,7 @@ namespace UnityExtensions
         /// </summary>
         public int GetPrevious(int id)
         {
-            return _list[id].previous;
+            return _array[id].previous;
         }
 
 
@@ -108,51 +115,53 @@ namespace UnityExtensions
         /// </summary>
         public int GetNext(int id)
         {
-            return _list[id].next;
+            return _array[id].next;
         }
 
 
-        int Add(ref Node node)
+        int InternalAdd(ref Node node)
         {
             int index;
 
             if (_emptyIds.Count > 0)
             {
                 index = _emptyIds.Pop();
-                _list[index] = node;
+                _array[index] = node;
             }
             else
             {
-                _list.Add(node);
-                index = _list.Count - 1;
+                if (_arrayCount == _array.Length)
+                {
+                    Array.Resize(ref _array, _array.Length * 2);
+                }
+                index = _arrayCount;
+                _array[_arrayCount++] = node;
             }
 
             return index;
         }
 
 
-        void Remove(int id, ref Node node)
+        void InternalRemove(int id)
         {
+            var node = _array[id];
+
             if (_first == id) _first = node.next;
             if (_last == id) _last = node.previous;
 
             if (node.previous != -1)
             {
-                Node tmp = _list[node.previous];
-                tmp.next = node.next;
-                _list[node.previous] = tmp;
+                _array[node.previous].next = node.next;
                 node.previous = -1;
             }
             if (node.next != -1)
             {
-                Node tmp = _list[node.next];
-                tmp.previous = node.previous;
-                _list[node.next] = tmp;
+                _array[node.next].previous = node.previous;
                 node.next = -1;
             }
 
             node.value = default;
-            _list[id] = node;
+            _array[id] = node;
             _emptyIds.Push(id);
         }
 
@@ -164,15 +173,10 @@ namespace UnityExtensions
         public int AddFirst(T value)
         {
             var node = new Node { previous = -1, next = _first, value = value };
-            int newId = Add(ref node);
+            int newId = InternalAdd(ref node);
 
             if (_first == -1) _last = newId;
-            else
-            {
-                var tmp = _list[_first];
-                tmp.previous = newId;
-                _list[_first] = tmp;
-            }
+            else _array[_first].previous = newId;
             _first = newId;
 
             return newId;
@@ -186,15 +190,10 @@ namespace UnityExtensions
         public int AddLast(T value)
         {
             var node = new Node { previous = _last, next = -1, value = value };
-            int newId = Add(ref node);
+            int newId = InternalAdd(ref node);
 
             if (_first == -1) _first = newId;
-            else
-            {
-                var tmp = _list[_last];
-                tmp.next = newId;
-                _list[_last] = tmp;
-            }
+            else _array[_last].next = newId;
             _last = newId;
 
             return _last;
@@ -207,27 +206,19 @@ namespace UnityExtensions
         /// <returns> id </returns>
         public int AddAfter(int id, T value)
         {
-            var prevNode = _list[id];
-            if (prevNode.previous == prevNode.next && _first != id)
+            if (_array[id].isAlone && _first != id)
             {
                 throw new Exception("invalid id");
             }
 
-            var node = new Node { previous = id, next = prevNode.next, value = value };
-            int newId = Add(ref node);
+            var prevNodeNext = _array[id].next;
+            var node = new Node { previous = id, next = prevNodeNext, value = value };
+            int newId = InternalAdd(ref node);
 
-            if (prevNode.next == -1)
-            {
-                _last = newId;
-            }
-            else
-            {
-                var tmp = _list[prevNode.next];
-                tmp.previous = newId;
-                _list[prevNode.next] = tmp;
-            }
-            prevNode.next = newId;
-            _list[id] = prevNode;
+            if (prevNodeNext == -1) _last = newId;
+            else _array[prevNodeNext].previous = newId;
+
+            _array[id].next = newId;
 
             return newId;
         }
@@ -239,27 +230,19 @@ namespace UnityExtensions
         /// <returns> id </returns>
         public int AddBefore(int id, T value)
         {
-            var nextNode = _list[id];
-            if (nextNode.previous == nextNode.next && _first != id)
+            if (_array[id].isAlone && _first != id)
             {
                 throw new Exception("invalid id");
             }
 
-            var node = new Node { previous = nextNode.previous, next = id, value = value };
-            int newId = Add(ref node);
+            var nextNodePrevious = _array[id].previous;
+            var node = new Node { previous = nextNodePrevious, next = id, value = value };
+            int newId = InternalAdd(ref node);
 
-            if (nextNode.previous == -1)
-            {
-                _first = newId;
-            }
-            else
-            {
-                var tmp = _list[nextNode.previous];
-                tmp.next = newId;
-                _list[nextNode.previous] = tmp;
-            }
-            nextNode.previous = newId;
-            _list[id] = nextNode;
+            if (nextNodePrevious == -1) _first = newId;
+            else _array[nextNodePrevious].next = newId;
+            
+            _array[id].previous = newId;
 
             return newId;
         }
@@ -271,7 +254,8 @@ namespace UnityExtensions
         public void Clear()
         {
             _emptyIds.Clear();
-            _list.Clear();
+            Array.Clear(_array, 0, _arrayCount);
+            _arrayCount = 0;
             _first = -1;
             _last = -1;
         }
@@ -282,12 +266,11 @@ namespace UnityExtensions
         /// </summary>
         public void Remove(int id)
         {
-            var node = _list[id];
-            if (node.previous == node.next && _first != id)
+            if (_array[id].isAlone && _first != id)
             {
                 throw new Exception("invalid id");
             }
-            Remove(id, ref node);
+            InternalRemove(id);
         }
 
 
@@ -300,8 +283,7 @@ namespace UnityExtensions
             {
                 throw new Exception("empty list");
             }
-            var node = _list[_first];
-            Remove(_first, ref node);
+            InternalRemove(_first);
         }
 
 
@@ -314,8 +296,43 @@ namespace UnityExtensions
             {
                 throw new Exception("empty list");
             }
-            var node = _list[_last];
-            Remove(_last, ref node);
+            InternalRemove(_last);
+        }
+
+
+        public struct Enumerator
+        {
+            Node[] _array;
+            int _first;
+            int _current;
+
+            internal Enumerator(ref QuickLinkedList<T> linkedList)
+            {
+                _array = linkedList._array;
+                _first = linkedList._first;
+                _current = -1;
+            }
+
+            public T Current => _array[_current].value;
+
+            public bool MoveNext()
+            {
+                if (_current >= 0)
+                {
+                    _current = _array[_current].next;
+                }
+                else
+                {
+                    _current = _first;
+                }
+
+                return _current >= 0;
+            }
+
+            public void Reset()
+            {
+                throw new NotSupportedException();
+            }
         }
 
     } // QuickLinkedList<T>

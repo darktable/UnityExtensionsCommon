@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
@@ -146,7 +147,7 @@ namespace UnityExtensions
         /// <summary>
         /// 判断集合是否为 null 或元素个数是否为 0
         /// </summary>
-        public static bool IsNullOrEmpty(ICollection collection)
+        public static bool IsNullOrEmpty<T>(T collection) where T : ICollection
         {
             return collection == null || collection.Count == 0;
         }
