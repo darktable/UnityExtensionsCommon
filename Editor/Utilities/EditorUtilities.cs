@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace UnityExtensions.Editor
     /// </summary>
     public struct EditorUtilities
     {
-        static float _deltaTime;
+        static float _unscaledDeltaTime;
         static double _lastTimeSinceStartup;
 
 
@@ -20,32 +21,33 @@ namespace UnityExtensions.Editor
         {
             EditorApplication.update += () =>
             {
-                _deltaTime = (float)(EditorApplication.timeSinceStartup - _lastTimeSinceStartup);
+                _unscaledDeltaTime = (float)(EditorApplication.timeSinceStartup - _lastTimeSinceStartup);
                 _lastTimeSinceStartup = EditorApplication.timeSinceStartup;
             };
         }
 
 
-        public static float deltaTime
+        public static float unscaledDeltaTime
         {
-            get { return _deltaTime; }
+            get { return _unscaledDeltaTime; }
         }
 
 
-        /// <summary>
-        /// 打开指定路径的文件夹（可以使用文件路径，可以使用相对路径）
-        /// </summary>
-        public static void OpenFolder(string path)
+        public static PlayModeStateChange playMode
         {
-#if UNITY_EDITOR_WIN
-            path = path.Replace('/', '\\');
-
-            while (!Directory.Exists(path))
-                path = path.Substring(0, path.LastIndexOf('\\'));
-
-            System.Diagnostics.Process.Start("explorer.exe", path);
-#endif
-            // TODO: mac，linux
+            get
+            {
+                if (EditorApplication.isPlayingOrWillChangePlaymode)
+                {
+                    if (EditorApplication.isPlaying) return PlayModeStateChange.EnteredPlayMode;
+                    else return PlayModeStateChange.ExitingEditMode;
+                }
+                else
+                {
+                    if (EditorApplication.isPlaying) return PlayModeStateChange.ExitingPlayMode;
+                    else return PlayModeStateChange.EnteredEditMode;
+                }
+            }
         }
 
     } // struct EditorUtilities

@@ -4,10 +4,13 @@ using System.Collections.Generic;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 快速链表，与 LinkedList 相比，本实现使用连续的 struct node 提高性能
+    /// 快速链表. 使用情景：
+    ///     添加或删除元素需要 O(1) 的时间复杂度；
+    ///     添加或删除元素不希望造成堆对象的创建和回收；
+    ///     在遍历时需要添加或删除元素（不能使用 foreach）。
     /// 注意：必须使用带参数的构造函数
     /// </summary>
-    public struct QuickLinkedList<T>
+    public class QuickLinkedList<T>
     {
         /// <summary>
         /// 链表节点
@@ -75,14 +78,11 @@ namespace UnityExtensions
 
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(ref this);
+            return new Enumerator(this);
         }
 
 
-        /// <summary>
-        /// 注意：必须通过此构造方法创建 QuickLinkedList 实例
-        /// </summary>
-        public QuickLinkedList(int capacity)
+        public QuickLinkedList(int capacity = 16)
         {
             _emptyIds = new Stack<int>(4);
             _array = new Node[capacity < 4 ? 4 : capacity];
@@ -152,14 +152,14 @@ namespace UnityExtensions
             if (node.previous != -1)
             {
                 _array[node.previous].next = node.next;
-                node.previous = -1;
             }
             if (node.next != -1)
             {
                 _array[node.next].previous = node.previous;
-                node.next = -1;
             }
 
+            node.previous = -1;
+            node.next = -1;
             node.value = default;
             _array[id] = node;
             _emptyIds.Push(id);
@@ -306,7 +306,7 @@ namespace UnityExtensions
             int _first;
             int _current;
 
-            internal Enumerator(ref QuickLinkedList<T> linkedList)
+            internal Enumerator(QuickLinkedList<T> linkedList)
             {
                 _array = linkedList._array;
                 _first = linkedList._first;
@@ -335,6 +335,6 @@ namespace UnityExtensions
             }
         }
 
-    } // QuickLinkedList<T>
+    } // class QuickLinkedList<T>
 
 } // namespace UnityExtensions

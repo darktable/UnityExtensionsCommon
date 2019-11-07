@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
@@ -24,6 +23,18 @@ namespace UnityExtensions
         }
 
 
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        static void InitializeEditor()
+        {
+            UnityEditor.EditorApplication.update += () =>
+            {
+                if (!Application.isPlaying) unitedUpdate?.Invoke();
+            };
+        }
+#endif
+
+
         /// <summary>
         /// 仅用于运行时
         /// </summary>
@@ -44,6 +55,41 @@ namespace UnityExtensions
         /// 仅用于运行时
         /// </summary>
         public static event Action onGUI;
+
+
+        /// <summary>
+        /// 一个通用的 Update，编辑器和运行时都会触发
+        /// 注意：应该同时搭配使用 unitedDeltaTime
+        /// </summary>
+        public static event Action unitedUpdate;
+
+
+        public static float unitedDeltaTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    return Editor.EditorUtilities.unscaledDeltaTime * Time.timeScale;
+                else
+#endif
+                    return Time.deltaTime;
+            }
+        }
+
+
+        public static float unitedUnscaledDeltaTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (Application.isPlaying)
+                    return Editor.EditorUtilities.unscaledDeltaTime;
+                else
+#endif
+                    return Time.unscaledDeltaTime;
+            }
+        }
 
 
         /// <summary>
@@ -112,6 +158,7 @@ namespace UnityExtensions
             void Update()
             {
                 update?.Invoke();
+                unitedUpdate?.Invoke();
             }
 
             void LateUpdate()

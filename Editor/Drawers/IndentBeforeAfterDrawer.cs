@@ -7,7 +7,7 @@ namespace UnityExtensions.Editor.AttributeDrawers
 {
     [CustomPropertyDrawer(typeof(IndentBeforeAttribute))]
     [CustomPropertyDrawer(typeof(IndentAfterAttribute))]
-    class IndentBeforeAfterDrawer : BasePropertyDrawer
+    class IndentBeforeAfterDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

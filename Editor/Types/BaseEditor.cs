@@ -11,12 +11,6 @@ namespace UnityExtensions.Editor
     {
         protected new T target => base.target as T;
 
-
-        public override void OnInspectorGUI()
-        {
-            DrawDefaultInspector();
-        }
-
     } // class BaseEditor<T>
 
 } // namespace UnityExtensions.Editor

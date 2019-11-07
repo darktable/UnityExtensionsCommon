@@ -46,7 +46,7 @@ namespace UnityExtensions.Editor
     {
         int _indent;
 
-        public static IndentLevelScope New(int indentLevel, bool relative = true)
+        public static IndentLevelScope New(int indentLevel = 1, bool relative = true)
         {
             var scope = new IndentLevelScope { _indent = EditorGUI.indentLevel };
             EditorGUI.indentLevel = relative ? (scope._indent + indentLevel) : indentLevel;
