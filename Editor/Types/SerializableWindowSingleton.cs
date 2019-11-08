@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using UnityEditor;
+using UnityEngine;
 
 namespace UnityExtensions.Editor
 {
@@ -9,41 +10,27 @@ namespace UnityExtensions.Editor
     /// </summary>
     public abstract class SerializableWindowSingleton<T> : WindowSingleton<T> where T : SerializableWindowSingleton<T>
     {
-        protected void Serialize()
-        {
-            BeforeSerialize();
-            var data = EditorJsonUtility.ToJson(this);
-            EditorPrefs.SetString(typeof(T).FullName, data);
-        }
-
-
-        protected void Deserialize()
-        {
-            var data = EditorPrefs.GetString(typeof(T).FullName);
-            EditorJsonUtility.FromJsonOverwrite(data, this);
-            AfterDeserialize();
-        }
-
-
         protected override void Initialize()
         {
-            Deserialize();
+            EditorJsonUtility.FromJsonOverwrite(Load(), this);
         }
 
 
         protected virtual void OnLostFocus()
         {
-            Serialize();
+            Save(EditorJsonUtility.ToJson(this));
         }
 
 
-        protected virtual void BeforeSerialize()
+        protected virtual void Save(string data)
         {
+            EditorPrefs.SetString($"{typeof(T).FullName}@{Application.dataPath}", data);
         }
 
 
-        protected virtual void AfterDeserialize()
+        protected virtual string Load()
         {
+            return EditorPrefs.GetString($"{typeof(T).FullName}@{Application.dataPath}");
         }
 
     } // class SerializableWindowSingleton<T>
