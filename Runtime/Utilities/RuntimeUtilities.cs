@@ -92,6 +92,12 @@ namespace UnityExtensions
         }
 
 
+        public static float GetUnitedDeltaTime(TimeMode mode)
+        {
+            return mode == TimeMode.Normal ? unitedDeltaTime : unitedUnscaledDeltaTime;
+        }
+
+
         /// <summary>
         /// 仅用于运行时
         /// </summary>
