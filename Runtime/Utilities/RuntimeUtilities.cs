@@ -19,6 +19,7 @@ namespace UnityExtensions
             _globalGameObject = new GameObject("GlobalGameObject");
             _globalGameObject.AddComponent<GlobalComponent>();
             _globalGameObject.hideFlags = HideFlags.HideInHierarchy;
+            _globalGameObject.transform.ResetLocal();
             UObject.DontDestroyOnLoad(_globalGameObject);
         }
 
@@ -33,6 +34,9 @@ namespace UnityExtensions
             };
         }
 #endif
+
+
+        public static Transform globalTransform => _globalGameObject.transform;
 
 
         /// <summary>
@@ -51,10 +55,6 @@ namespace UnityExtensions
         /// 仅用于运行时
         /// </summary>
         public static event Action lateUpdate;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action onGUI;
 
 
         /// <summary>
@@ -109,7 +109,6 @@ namespace UnityExtensions
                 case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate += action; return;
                 case UpdateMode.Update: update += action; return;
                 case UpdateMode.LateUpdate: lateUpdate += action; return;
-                case UpdateMode.OnGUI: onGUI += action; return;
             }
         }
 
@@ -125,7 +124,6 @@ namespace UnityExtensions
                 case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate -= action; return;
                 case UpdateMode.Update: update -= action; return;
                 case UpdateMode.LateUpdate: lateUpdate -= action; return;
-                case UpdateMode.OnGUI: onGUI -= action; return;
             }
         }
 
@@ -170,11 +168,6 @@ namespace UnityExtensions
             void LateUpdate()
             {
                 lateUpdate?.Invoke();
-            }
-
-            void OnGUI()
-            {
-                onGUI?.Invoke();
             }
 
         } // class GlobalComponent

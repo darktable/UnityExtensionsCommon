@@ -8,7 +8,6 @@ namespace UnityExtensions
     ///     添加或删除元素需要 O(1) 的时间复杂度；
     ///     添加或删除元素不希望造成堆对象的创建和回收；
     ///     在遍历时需要添加或删除元素（不能使用 foreach）。
-    /// 注意：必须使用带参数的构造函数
     /// </summary>
     public class QuickLinkedList<T>
     {
