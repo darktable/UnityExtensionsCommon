@@ -18,7 +18,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 处理任务，注意这可能是并行的
+        /// 处理任务，注意这是并行调用的
         /// </summary>
         void Process();
 

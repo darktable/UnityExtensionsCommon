@@ -55,6 +55,10 @@ namespace UnityExtensions
         /// 仅用于运行时
         /// </summary>
         public static event Action lateUpdate;
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action waitForEndOfFrame;
 
 
         /// <summary>
@@ -109,6 +113,7 @@ namespace UnityExtensions
                 case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate += action; return;
                 case UpdateMode.Update: update += action; return;
                 case UpdateMode.LateUpdate: lateUpdate += action; return;
+                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame += action; return;
             }
         }
 
@@ -124,6 +129,7 @@ namespace UnityExtensions
                 case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate -= action; return;
                 case UpdateMode.Update: update -= action; return;
                 case UpdateMode.LateUpdate: lateUpdate -= action; return;
+                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame -= action; return;
             }
         }
 
@@ -142,6 +148,7 @@ namespace UnityExtensions
             void Start()
             {
                 StartCoroutine(WaitForFixedUpdate());
+                StartCoroutine(WaitForEndOfFrame());
 
                 IEnumerator WaitForFixedUpdate()
                 {
@@ -150,6 +157,16 @@ namespace UnityExtensions
                     {
                         yield return wait;
                         waitForFixedUpdate?.Invoke();
+                    }
+                }
+
+                IEnumerator WaitForEndOfFrame()
+                {
+                    var wait = new WaitForEndOfFrame();
+                    while (true)
+                    {
+                        yield return wait;
+                        waitForEndOfFrame?.Invoke();
                     }
                 }
             }
