@@ -161,6 +161,12 @@ namespace UnityExtensions
         }
 
 
+        public static T GetLast<T>(this IList<T> list)
+        {
+            return list[list.Count - 1];
+        }
+
+
         /// <summary>
         /// 遍历任意维度的数组
         /// </summary>

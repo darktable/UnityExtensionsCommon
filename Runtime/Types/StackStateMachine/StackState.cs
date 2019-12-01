@@ -9,9 +9,9 @@ namespace UnityExtensions
     /// </summary>
     public abstract class BaseStackState : IStackState
     {
-        public abstract void OnEnter(StackAction stackAction);
-        public abstract void OnExit(StackAction stackAction);
-        public abstract void OnUpdate(float deltaTime);
+        public virtual void OnEnter(StackAction stackAction) { }
+        public virtual void OnExit(StackAction stackAction) { }
+        public virtual void OnUpdate(float deltaTime) { }
     }
 
 

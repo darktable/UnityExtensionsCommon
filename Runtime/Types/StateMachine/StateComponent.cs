@@ -9,10 +9,10 @@ namespace UnityExtensions
     /// </summary>
     public abstract class BaseStateComponent : ScriptableComponent, IState
     {
-        public abstract void OnEnter();
-        public abstract void OnExit();
-        public abstract void OnUpdate(float deltaTime);
-    }
+        public virtual void OnEnter() { }
+        public virtual void OnExit() { }
+        public virtual void OnUpdate(float deltaTime) { }
+}
 
 
     /// <summary>

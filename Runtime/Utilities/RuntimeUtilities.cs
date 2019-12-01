@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
@@ -188,6 +189,77 @@ namespace UnityExtensions
             }
 
         } // class GlobalComponent
+
+
+        /// <summary>
+        /// Support binary reading/writing for Vector2, Vector3, Vector4, byte[]
+        /// </summary>
+        public static void RegisterCommonBinaryReadWrite()
+        {
+            if (_commonBinaryReadWriteRegistered) return;
+            _commonBinaryReadWriteRegistered = true;
+
+            ReaderWriterExtensions.Register((BinaryWriter writer, Vector2 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+            });
+
+            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            {
+                Vector2 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                return value;
+            });
+
+            ReaderWriterExtensions.Register((BinaryWriter writer, Vector3 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+                writer.Write(value.z);
+            });
+
+            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            {
+                Vector3 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                value.z = reader.ReadSingle();
+                return value;
+            });
+
+            ReaderWriterExtensions.Register((BinaryWriter writer, Vector4 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+                writer.Write(value.z);
+                writer.Write(value.w);
+            });
+
+            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            {
+                Vector4 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                value.z = reader.ReadSingle();
+                value.w = reader.ReadSingle();
+                return value;
+            });
+
+            ReaderWriterExtensions.Register((BinaryWriter writer, byte[] value) =>
+            {
+                writer.Write(value.Length);
+                writer.Write(value);
+            });
+
+            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            {
+                int length = reader.ReadInt32();
+                return reader.ReadBytes(length);
+            });
+        }
+        static bool _commonBinaryReadWriteRegistered;
 
 
         /// <summary>
