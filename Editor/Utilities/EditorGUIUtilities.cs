@@ -274,7 +274,7 @@ namespace UnityExtensions.Editor
         /// <summary>
         /// 拖动鼠标以修改数值
         /// </summary>
-        static float DragValue(Rect rect, float value, float sensitivity)
+        public static float DragValue(Rect rect, float value, float sensitivity)
         {
             int id = GUIUtility.GetControlID(FocusType.Passive);
             Event current = Event.current;
