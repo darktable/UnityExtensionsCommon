@@ -88,7 +88,7 @@ namespace UnityExtensions
             get
             {
 #if UNITY_EDITOR
-                if (Application.isPlaying)
+                if (!Application.isPlaying)
                     return Editor.EditorUtilities.unscaledDeltaTime;
                 else
 #endif
