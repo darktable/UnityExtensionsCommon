@@ -311,7 +311,7 @@ namespace UnityExtensions.Editor
                     switch (_dragState)
                     {
                         case 1:
-                            if ((Event.current.mousePosition - _dragPos).sqrMagnitude > 16)
+                            if ((Event.current.mousePosition - _dragPos).sqrMagnitude > 4)
                             {
                                 _dragState = 2;
                             }
@@ -381,6 +381,11 @@ namespace UnityExtensions.Editor
                         EditorGUIUtility.editingTextField = false;
                         GUIUtility.hotControl = id;
                         _dragState = 1;
+
+                        float offset = current.mousePosition.x - rect.x + 1f;
+                        value01 = Mathf.Clamp01(offset / rect.width);
+                        GUI.changed = true;
+
                         current.Use();
                     }
                     break;
@@ -404,6 +409,7 @@ namespace UnityExtensions.Editor
                         float offset = current.mousePosition.x - rect.x + 1f;
                         value01 = Mathf.Clamp01(offset / rect.width);
                         GUI.changed = true;
+
                         current.Use();
                     }
                     break;
