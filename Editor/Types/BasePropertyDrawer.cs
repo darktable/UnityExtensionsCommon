@@ -10,7 +10,7 @@ namespace UnityExtensions.Editor
     /// </summary>
     public class BasePropertyDrawer<T> : PropertyDrawer where T : PropertyAttribute
     {
-        protected new T attribute => base.attribute as T;
+        protected new T attribute => (T)base.attribute;
 
     } // class BasePropertyDrawer<T>
 

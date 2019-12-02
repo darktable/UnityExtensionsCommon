@@ -10,7 +10,7 @@ namespace UnityExtensions.Editor
     /// </summary>
     public class BaseDecoratorDrawer<T> : DecoratorDrawer where T : PropertyAttribute
     {
-        protected new T attribute => base.attribute as T;
+        protected new T attribute => (T)base.attribute;
 
     } // class BaseDecoratorDrawer<T>
 

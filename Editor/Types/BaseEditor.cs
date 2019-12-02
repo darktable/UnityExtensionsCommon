@@ -9,7 +9,7 @@ namespace UnityExtensions.Editor
     /// </summary>
     public class BaseEditor<T> : UnityEditor.Editor where T : Object
     {
-        protected new T target => base.target as T;
+        protected new T target => (T)base.target;
 
     } // class BaseEditor<T>
 
