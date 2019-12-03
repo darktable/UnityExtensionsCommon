@@ -167,6 +167,14 @@ namespace UnityExtensions
         }
 
 
+        public static void Swap<T>(this IList<T> list, int firstIndex, int secondIndex)
+        {
+            var first = list[firstIndex];
+            list[firstIndex] = list[secondIndex];
+            list[secondIndex] = first;
+        }
+
+
         /// <summary>
         /// 遍历任意维度的数组
         /// </summary>
