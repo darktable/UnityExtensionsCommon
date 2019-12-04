@@ -360,15 +360,11 @@ namespace UnityExtensions.Editor
             Color backgroundColor,
             Color foregroundColor)
         {
-            using (GUIColorScope.New(backgroundColor))
-            {
-                GUI.DrawTexture(rect, EditorGUIUtility.whiteTexture);
+            var progressRect = rect;
+            progressRect.width = Mathf.Round(progressRect.width * value01);
 
-                var progressRect = rect;
-                progressRect.width = Mathf.Round(progressRect.width * value01);
-                GUI.color = foregroundColor;
-                GUI.DrawTexture(progressRect, EditorGUIUtility.whiteTexture);
-            }
+            EditorGUI.DrawRect(rect, backgroundColor);
+            EditorGUI.DrawRect(progressRect, foregroundColor);
 
             int id = GUIUtility.GetControlID(FocusType.Passive);
             Event current = Event.current;
