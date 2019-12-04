@@ -320,7 +320,7 @@ namespace UnityExtensions.Editor
 
                         case 2:
                             value += HandleUtility.niceMouseDelta * sensitivity;
-                            value = MathUtilities.RoundToSignificantDigitsFloat(value);
+                            value = MathUtilities.RoundToSignificantDigitsFloat(value, 6);
                             GUI.changed = true;
                             current.Use();
                             break;

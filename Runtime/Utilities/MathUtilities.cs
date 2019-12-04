@@ -139,21 +139,28 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 保留指定的有效位数, 对剩余部分四舍五入
+        /// 保留指定的有效位数, 对剩余部分四舍五入.
+        /// 一般而言 double 的有效位数有 15-17 位.
         /// </summary>
-        public static double RoundToSignificantDigits(double value, int digits = 15)
+        public static double RoundToSignificantDigits(double value, int digits)
         {
             if (value == 0.0) return 0.0;
 
-            double scale = Math.Pow(10.0, Math.Floor(Math.Log10(Math.Abs(value))) + 1);
-            return scale * Math.Round(value / scale, digits);
+            int intDigits = (int)Math.Floor(Math.Log10(Math.Abs(value))) + 1;
+
+            if (intDigits <= digits) return Math.Round(value, digits - intDigits);
+
+            double scale = Math.Pow(10, intDigits - digits);
+
+            return Math.Round(value / scale) * scale;
         }
 
 
         /// <summary>
-        /// 保留指定的有效位数, 对剩余部分四舍五入
+        /// 保留指定的有效位数, 对剩余部分四舍五入.
+        /// 一般而言 float 的有效位数有 6-9 位.
         /// </summary>
-        public static float RoundToSignificantDigitsFloat(float value, int digits = 6)
+        public static float RoundToSignificantDigitsFloat(float value, int digits)
         {
             return (float)RoundToSignificantDigits(value, digits);
         }

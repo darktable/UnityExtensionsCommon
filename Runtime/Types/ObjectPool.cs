@@ -53,13 +53,13 @@ namespace UnityExtensions
             public T item { get; private set; }
             ObjectPool<T> _pool;
 
-
             public TempObject(ObjectPool<T> objectPool)
             {
                 item = objectPool.Spawn();
                 _pool = objectPool;
             }
 
+            public static implicit operator T(TempObject temp) => temp.item;
 
             void IDisposable.Dispose()
             {
