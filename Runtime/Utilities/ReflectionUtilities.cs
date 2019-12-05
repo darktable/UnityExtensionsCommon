@@ -40,18 +40,19 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 获取对象的成员字段信息。从最终类型开始向上查找，忽略字段的可见性。
-        /// </summary>
-        public static FieldInfo GetFieldInfo(object instance, string fieldName)
+        public static Type GetTypeInSameAssembly(string typeName, Type otherType)
         {
-            Type type = instance.GetType();
-            FieldInfo info = null;
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+            var assemblyQualifiedName = otherType.AssemblyQualifiedName;
+            typeName += assemblyQualifiedName.Substring(assemblyQualifiedName.IndexOf(','));
+            return Type.GetType(typeName);
+        }
 
-            while(type != null)
+
+        static FieldInfo InternalGetFieldInfo(Type type, string fieldName, BindingFlags flags)
+        {
+            while (type != null)
             {
-                info = type.GetField(fieldName, flags);
+                var info = type.GetField(fieldName, flags);
                 if (info != null) return info;
                 type = type.BaseType;
             }
@@ -61,17 +62,40 @@ namespace UnityExtensions
 
 
         /// <summary>
+        /// 获取对象的成员字段信息。从最终类型开始向上查找，忽略字段的可见性。
+        /// </summary>
+        public static FieldInfo GetFieldInfo(object instance, string fieldName)
+        {
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetFieldInfo(instance.GetType(), fieldName, flags);
+        }
+
+
+        /// <summary>
         /// 获取类型的静态字段信息。从最终类型开始向上查找，忽略字段的可见性。
         /// </summary>
         public static FieldInfo GetFieldInfo<T>(string fieldName)
         {
-            Type type = typeof(T);
-            FieldInfo info = null;
             BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetFieldInfo(typeof(T), fieldName, flags);
+        }
 
+
+        /// <summary>
+        /// 获取类型的静态字段信息。从最终类型开始向上查找，忽略字段的可见性。
+        /// </summary>
+        public static FieldInfo GetFieldInfo(Type type, string fieldName)
+        {
+            BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetFieldInfo(type, fieldName, flags);
+        }
+
+
+        static PropertyInfo InternalGetPropertyInfo(Type type, string propertyName, BindingFlags flags)
+        {
             while (type != null)
             {
-                info = type.GetField(fieldName, flags);
+                var info = type.GetProperty(propertyName, flags);
                 if (info != null) return info;
                 type = type.BaseType;
             }
@@ -85,18 +109,8 @@ namespace UnityExtensions
         /// </summary>
         public static PropertyInfo GetPropertyInfo(object instance, string propertyName)
         {
-            Type type = instance.GetType();
-            PropertyInfo info = null;
             BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-
-            while (type != null)
-            {
-                info = type.GetProperty(propertyName, flags);
-                if (info != null) return info;
-                type = type.BaseType;
-            }
-
-            return null;
+            return InternalGetPropertyInfo(instance.GetType(), propertyName, flags);
         }
 
 
@@ -105,13 +119,26 @@ namespace UnityExtensions
         /// </summary>
         public static PropertyInfo GetPropertyInfo<T>(string propertyName)
         {
-            Type type = typeof(T);
-            PropertyInfo info = null;
             BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetPropertyInfo(typeof(T), propertyName, flags);
+        }
 
+
+        /// <summary>
+        /// 获取类型的静态属性信息。从最终类型开始向上查找，忽略属性的可见性。
+        /// </summary>
+        public static PropertyInfo GetPropertyInfo(Type type, string propertyName)
+        {
+            BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetPropertyInfo(type, propertyName, flags);
+        }
+
+
+        static MethodInfo InternalGetMethodInfo(Type type, string methodName, BindingFlags flags)
+        {
             while (type != null)
             {
-                info = type.GetProperty(propertyName, flags);
+                var info = type.GetMethod(methodName, flags);
                 if (info != null) return info;
                 type = type.BaseType;
             }
@@ -125,18 +152,8 @@ namespace UnityExtensions
         /// </summary>
         public static MethodInfo GetMethodInfo(object instance, string methodName)
         {
-            Type type = instance.GetType();
-            MethodInfo info = null;
             BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-
-            while (type != null)
-            {
-                info = type.GetMethod(methodName, flags);
-                if (info != null) return info;
-                type = type.BaseType;
-            }
-
-            return null;
+            return InternalGetMethodInfo(instance.GetType(), methodName, flags);
         }
 
 
@@ -145,18 +162,18 @@ namespace UnityExtensions
         /// </summary>
         public static MethodInfo GetMethodInfo<T>(string methodName)
         {
-            Type type = typeof(T);
-            MethodInfo info = null;
             BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetMethodInfo(typeof(T), methodName, flags);
+        }
 
-            while (type != null)
-            {
-                info = type.GetMethod(methodName, flags);
-                if (info != null) return info;
-                type = type.BaseType;
-            }
 
-            return null;
+        /// <summary>
+        /// 获取类型的静态方法信息。从最终类型开始向上查找，忽略方法的可见性。
+        /// </summary>
+        public static MethodInfo GetMethodInfo(Type type, string methodName)
+        {
+            BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+            return InternalGetMethodInfo(type, methodName, flags);
         }
 
 
@@ -179,6 +196,15 @@ namespace UnityExtensions
 
 
         /// <summary>
+        /// 获取类型的静态字段值。从最终类型开始向上查找，忽略字段的可见性。
+        /// </summary>
+        public static object GetFieldValue(Type type, string fieldName)
+        {
+            return GetFieldInfo(type, fieldName).GetValue(null);
+        }
+
+
+        /// <summary>
         /// 设置对象的成员字段值。从最终类型开始向上查找，忽略字段的可见性。
         /// </summary>
         public static void SetFieldValue(object instance, string fieldName, object value)
@@ -193,6 +219,15 @@ namespace UnityExtensions
         public static void SetFieldValue<T>(string fieldName, object value)
         {
             GetFieldInfo<T>(fieldName).SetValue(null, value);
+        }
+
+
+        /// <summary>
+        /// 设置类型的静态字段值。从最终类型开始向上查找，忽略字段的可见性。
+        /// </summary>
+        public static void SetFieldValue(Type type, string fieldName, object value)
+        {
+            GetFieldInfo(type, fieldName).SetValue(null, value);
         }
 
 
@@ -215,6 +250,15 @@ namespace UnityExtensions
 
 
         /// <summary>
+        /// 获取类型的静态属性值。从最终类型开始向上查找，忽略属性的可见性。
+        /// </summary>
+        public static object GetPropertyValue(Type type, string propertyName)
+        {
+            return GetPropertyInfo(type, propertyName).GetValue(null, null);
+        }
+
+
+        /// <summary>
         /// 设置对象的成员属性值。从最终类型开始向上查找，忽略属性的可见性。
         /// </summary>
         public static void SetPropertyValue(object instance, string propertyName, object value)
@@ -233,6 +277,15 @@ namespace UnityExtensions
 
 
         /// <summary>
+        /// 设置类型的静态属性值。从最终类型开始向上查找，忽略属性的可见性。
+        /// </summary>
+        public static void SetPropertyValue(Type type, string propertyName, object value)
+        {
+            GetPropertyInfo(type, propertyName).SetValue(null, value, null);
+        }
+
+
+        /// <summary>
         /// 调用对象的成员方法。从最终类型开始向上查找，忽略方法的可见性。
         /// </summary>
         public static object InvokeMethod(object instance, string methodName, params object[] param)
@@ -247,6 +300,15 @@ namespace UnityExtensions
         public static object InvokeMethod<T>(string methodName, params object[] param)
         {
             return GetMethodInfo<T>(methodName).Invoke(null, param);
+        }
+
+
+        /// <summary>
+        /// 调用类型的静态方法。从最终类型开始向上查找，忽略方法的可见性。
+        /// </summary>
+        public static object InvokeMethod(Type type, string methodName, params object[] param)
+        {
+            return GetMethodInfo(type, methodName).Invoke(null, param);
         }
 
     } // struct ReflectionUtilities
