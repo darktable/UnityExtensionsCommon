@@ -194,18 +194,18 @@ namespace UnityExtensions
         /// <summary>
         /// Support binary reading/writing for Vector2, Vector3, Vector4, byte[]
         /// </summary>
-        public static void RegisterCommonBinaryReadWrite()
+        public static void RegisterCommonIOMethods()
         {
             if (_commonBinaryReadWriteRegistered) return;
             _commonBinaryReadWriteRegistered = true;
 
-            ReaderWriterExtensions.Register((BinaryWriter writer, Vector2 value) =>
+            IOExtensions.Register((BinaryWriter writer, Vector2 value) =>
             {
                 writer.Write(value.x);
                 writer.Write(value.y);
             });
 
-            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            IOExtensions.Register((BinaryReader reader) =>
             {
                 Vector2 value;
                 value.x = reader.ReadSingle();
@@ -213,14 +213,14 @@ namespace UnityExtensions
                 return value;
             });
 
-            ReaderWriterExtensions.Register((BinaryWriter writer, Vector3 value) =>
+            IOExtensions.Register((BinaryWriter writer, Vector3 value) =>
             {
                 writer.Write(value.x);
                 writer.Write(value.y);
                 writer.Write(value.z);
             });
 
-            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            IOExtensions.Register((BinaryReader reader) =>
             {
                 Vector3 value;
                 value.x = reader.ReadSingle();
@@ -229,7 +229,7 @@ namespace UnityExtensions
                 return value;
             });
 
-            ReaderWriterExtensions.Register((BinaryWriter writer, Vector4 value) =>
+            IOExtensions.Register((BinaryWriter writer, Vector4 value) =>
             {
                 writer.Write(value.x);
                 writer.Write(value.y);
@@ -237,7 +237,7 @@ namespace UnityExtensions
                 writer.Write(value.w);
             });
 
-            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            IOExtensions.Register((BinaryReader reader) =>
             {
                 Vector4 value;
                 value.x = reader.ReadSingle();
@@ -247,13 +247,13 @@ namespace UnityExtensions
                 return value;
             });
 
-            ReaderWriterExtensions.Register((BinaryWriter writer, byte[] value) =>
+            IOExtensions.Register((BinaryWriter writer, byte[] value) =>
             {
                 writer.Write(value.Length);
                 writer.Write(value);
             });
 
-            ReaderWriterExtensions.Register((BinaryReader reader) =>
+            IOExtensions.Register((BinaryReader reader) =>
             {
                 int length = reader.ReadInt32();
                 return reader.ReadBytes(length);
