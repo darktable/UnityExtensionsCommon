@@ -31,7 +31,17 @@ namespace UnityExtensions
         {
             UnityEditor.EditorApplication.update += () =>
             {
-                if (!Application.isPlaying) unitedUpdate?.Invoke();
+                if (!Application.isPlaying)
+                {
+                    unitedUpdate?.Invoke();
+
+                    if (unitedUpdateOnce != null)
+                    {
+                        var call = unitedUpdateOnce;
+                        unitedUpdateOnce = null;
+                        call();
+                    }
+                }
             };
         }
 #endif
@@ -67,6 +77,34 @@ namespace UnityExtensions
         /// 注意：应该同时搭配使用 unitedDeltaTime
         /// </summary>
         public static event Action unitedUpdate;
+
+
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action fixedUpdateOnce;
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action waitForFixedUpdateOnce;
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action updateOnce;
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action lateUpdateOnce;
+        /// <summary>
+        /// 仅用于运行时
+        /// </summary>
+        public static event Action waitForEndOfFrameOnce;
+
+
+        /// <summary>
+        /// 一个通用的 Update，编辑器和运行时都会触发
+        /// </summary>
+        public static event Action unitedUpdateOnce;
 
 
         public static float unitedDeltaTime
@@ -158,6 +196,13 @@ namespace UnityExtensions
                     {
                         yield return wait;
                         waitForFixedUpdate?.Invoke();
+
+                        if (waitForFixedUpdateOnce != null)
+                        {
+                            var call = waitForFixedUpdateOnce;
+                            waitForFixedUpdateOnce = null;
+                            call();
+                        }
                     }
                 }
 
@@ -168,6 +213,13 @@ namespace UnityExtensions
                     {
                         yield return wait;
                         waitForEndOfFrame?.Invoke();
+
+                        if (waitForEndOfFrameOnce != null)
+                        {
+                            var call = waitForEndOfFrameOnce;
+                            waitForEndOfFrameOnce = null;
+                            call();
+                        }
                     }
                 }
             }
@@ -175,17 +227,45 @@ namespace UnityExtensions
             void FixedUpdate()
             {
                 fixedUpdate?.Invoke();
+
+                if (fixedUpdateOnce != null)
+                {
+                    var call = fixedUpdateOnce;
+                    fixedUpdateOnce = null;
+                    call();
+                }
             }
 
             void Update()
             {
                 update?.Invoke();
                 unitedUpdate?.Invoke();
+
+                if (updateOnce != null)
+                {
+                    var call = updateOnce;
+                    updateOnce = null;
+                    call();
+                }
+
+                if (unitedUpdateOnce != null)
+                {
+                    var call = unitedUpdateOnce;
+                    unitedUpdateOnce = null;
+                    call();
+                }
             }
 
             void LateUpdate()
             {
                 lateUpdate?.Invoke();
+
+                if (lateUpdateOnce != null)
+                {
+                    var call = lateUpdateOnce;
+                    lateUpdateOnce = null;
+                    call();
+                }
             }
 
         } // class GlobalComponent
