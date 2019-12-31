@@ -144,7 +144,7 @@ namespace UnityExtensions
             while (_states.Count > 0)
             {
                 int index = _states.Count - 1;
-                _states[index].OnReset();
+                _states[index]?.OnReset();
                 _states.RemoveAt(index);
             }
         }
