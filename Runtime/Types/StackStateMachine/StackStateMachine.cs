@@ -147,6 +147,7 @@ namespace UnityExtensions
                 _states[index]?.OnReset();
                 _states.RemoveAt(index);
             }
+            _currentStateTime = 0;
         }
 
 
