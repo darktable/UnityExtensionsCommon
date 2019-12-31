@@ -72,18 +72,6 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 作为子状态机使用时需要实现此方法
-        /// </summary>
-        public override void OnEnter() { }
-
-
-        /// <summary>
-        /// 作为子状态机使用时需要实现此方法
-        /// </summary>
-        public override void OnExit() { }
-
-
-        /// <summary>
         /// 更新当前状态
         /// 注意: 顶层状态机需要主动调用
         /// </summary>

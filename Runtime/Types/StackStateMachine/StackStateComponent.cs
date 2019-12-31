@@ -9,6 +9,7 @@ namespace UnityExtensions
     /// </summary>
     public abstract class BaseStackStateComponent : ScriptableComponent, IStackState
     {
+        public virtual void OnReset() { }
         public virtual void OnEnter(StackAction stackAction) { }
         public virtual void OnExit(StackAction stackAction) { }
         public virtual void OnUpdate(float deltaTime) { }
@@ -27,12 +28,6 @@ namespace UnityExtensions
 
         [SerializeField]
         StackStateEvent _onExit = default;
-
-
-        /// <summary>
-        /// 添加或移除更新状态触发的事件
-        /// </summary>
-        public event Action<float> onUpdate;
 
 
         /// <summary>
@@ -72,12 +67,6 @@ namespace UnityExtensions
         public override void OnExit(StackAction stackAction)
         {
             _onExit?.Invoke(stackAction);
-        }
-
-
-        public override void OnUpdate(float deltaTime)
-        {
-            onUpdate?.Invoke(deltaTime);
         }
 
     } // class StackStateComponent

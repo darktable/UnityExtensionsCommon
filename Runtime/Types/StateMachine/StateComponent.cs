@@ -30,12 +30,6 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 添加或移除更新状态触发的事件
-        /// </summary>
-        public event Action<float> onUpdate;
-
-
-        /// <summary>
         /// 添加或移除进入状态触发的事件
         /// </summary>
         public event UnityAction onEnter
@@ -72,12 +66,6 @@ namespace UnityExtensions
         public override void OnExit()
         {
             _onExit?.Invoke();
-        }
-
-
-        public override void OnUpdate(float deltaTime)
-        {
-            onUpdate?.Invoke(deltaTime);
         }
 
     } // class StateComponent

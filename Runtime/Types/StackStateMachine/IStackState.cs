@@ -17,6 +17,11 @@ namespace UnityExtensions
     public interface IStackState
     {
         /// <summary>
+        /// 状态机重置时触发
+        /// </summary>
+        void OnReset();
+
+        /// <summary>
         /// 进入状态时触发
         /// </summary>
         void OnEnter(StackAction stackAction);

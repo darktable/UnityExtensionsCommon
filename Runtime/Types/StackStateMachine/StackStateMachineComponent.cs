@@ -137,28 +137,26 @@ namespace UnityExtensions
         }
 
 
+        /// <summary>
+        /// 重置栈内所有状态并清空栈
+        /// </summary>
+        public void ResetStack()
+        {
+            while (_states.Count > 0)
+            {
+                int index = _states.Count - 1;
+                _states[index].OnReset();
+                _states.RemoveAt(index);
+            }
+        }
+
+
         protected virtual void StatePopped(T poppedState)
         {
         }
 
 
         protected virtual void StatePushed(T pushedState)
-        {
-        }
-
-
-        /// <summary>
-        /// 作为子状态机使用时需要实现此方法
-        /// </summary>
-        public override void OnEnter(StackAction stackAction)
-        {
-        }
-
-
-        /// <summary>
-        /// 作为子状态机使用时需要实现此方法
-        /// </summary>
-        public override void OnExit(StackAction stackAction)
         {
         }
 
@@ -171,6 +169,12 @@ namespace UnityExtensions
         {
             _currentStateTime += deltaTime;
             if (stateCount > 0) currentState?.OnUpdate(deltaTime);
+        }
+
+
+        public override void OnReset()
+        {
+            ResetStack();
         }
 
     } // class StackStateMachineComponent<T>
