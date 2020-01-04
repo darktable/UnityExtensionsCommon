@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在 Quaternion 字段上, 将其显示为欧拉角
+    /// Use on Quaternion
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class EulerAnglesAttribute : PropertyAttribute

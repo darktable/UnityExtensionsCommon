@@ -2,7 +2,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 状态栈的行为
+    /// State stack action.
     /// </summary>
     public enum StackAction
     {
@@ -12,27 +12,27 @@ namespace UnityExtensions
 
 
     /// <summary>
-    /// 栈状态接口
+    /// Stack state.
     /// </summary>
     public interface IStackState
     {
         /// <summary>
-        /// 状态机重置时触发
+        /// Called when StateMachine resets stack.
         /// </summary>
         void OnReset();
 
         /// <summary>
-        /// 进入状态时触发
+        /// Called when StateMachine enters this state.
         /// </summary>
         void OnEnter(StackAction stackAction);
 
         /// <summary>
-        /// 离开状态时触发
+        /// Called when StateMachine quits this state.
         /// </summary>
         void OnExit(StackAction stackAction);
 
         /// <summary>
-        /// 更新状态时触发
+        /// Called when StateMachine updates this state.
         /// </summary>
         void OnUpdate(float deltaTime);
 

@@ -2,7 +2,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 更新模式
+    /// UpdateMode
     /// </summary>
     public enum UpdateMode
     {

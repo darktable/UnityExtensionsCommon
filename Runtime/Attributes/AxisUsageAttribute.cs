@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// Axis 的使用方式
+    /// AxisUsage
     /// </summary>
     public enum AxisUsage
     {
@@ -21,7 +21,7 @@ namespace UnityExtensions
     }
 
     /// <summary>
-    /// 指定 Axis 用途
+    /// AxisUsageAttribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class AxisUsageAttribute : PropertyAttribute
@@ -29,7 +29,7 @@ namespace UnityExtensions
         AxisUsage _usage;
 
         /// <summary>
-        /// 指定 Axis 用途
+        /// AxisUsageAttribute
         /// </summary>
         public AxisUsageAttribute(AxisUsage usage)
         {

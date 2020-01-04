@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在一个 bool 字段上, 将其显示为按钮
+    /// Show a bool as toggle button
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class ToggleButtonAttribute : PropertyAttribute

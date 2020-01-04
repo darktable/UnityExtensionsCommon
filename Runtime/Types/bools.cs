@@ -8,8 +8,8 @@ namespace UnityExtensions
         public bool x;
         public bool y;
 
-        public bool anyTrue { get { return x || y; } }
-        public bool allTrue { get { return x && y; } }
+        public bool anyTrue => x || y;
+        public bool allTrue => x && y;
     }
 
 
@@ -20,8 +20,8 @@ namespace UnityExtensions
         public bool y;
         public bool z;
 
-        public bool anyTrue { get { return x || y || z; } }
-        public bool allTrue { get { return x && y && z; } }
+        public bool anyTrue => x || y || z;
+        public bool allTrue => x && y && z;
     }
 
     [Serializable]
@@ -32,8 +32,8 @@ namespace UnityExtensions
         public bool z;
         public bool w;
 
-        public bool anyTrue { get { return x || y || z || w; } }
-        public bool allTrue { get { return x && y && z && w; } }
+        public bool anyTrue => x || y || z || w;
+        public bool allTrue => x && y && z && w;
     }
 
 } // namespace UnityExtensions

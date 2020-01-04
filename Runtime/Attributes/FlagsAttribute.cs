@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在一个枚举字段上, 将其作为选择掩码使用
+    /// Use on an enum field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class FlagsAttribute : PropertyAttribute

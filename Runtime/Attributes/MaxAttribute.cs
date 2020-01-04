@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 让 int 或 float 字段的值限制在指定范围
+    /// Set maximum allowed value for int & float field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class MaxAttribute : PropertyAttribute
@@ -17,7 +17,7 @@ namespace UnityExtensions
         float _max;
 
         /// <summary>
-        /// 让 int 或 float 字段的值限制在指定范围
+        /// Set maximum allowed value for int & float field
         /// </summary>
         public MaxAttribute(float max)
         {

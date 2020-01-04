@@ -3,7 +3,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 状态机, 可作为一般状态机或子状态机使用
+    /// StateMachine
     /// </summary>
     public class StateMachine<T> : BaseState where T : class, IState
     {
@@ -12,13 +12,13 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 当前状态持续时间
+        /// Total time since entering the current state.
         /// </summary>
         public float currentStateTime => (float)_currentStateTime;
 
 
         /// <summary>
-        /// 当前状态持续时间
+        /// Total time since entering the current state.
         /// </summary>
         public double currentStateTimeDouble => _currentStateTime;
 
@@ -29,7 +29,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 当前状态
+        /// Get or set current state.
         /// </summary>
         public T currentState
         {
@@ -39,7 +39,7 @@ namespace UnityExtensions
 #if DEBUG
                 if (_duringSetting)
                 {
-                    throw new Exception("Shouldn't change state inside OnExit or OnEnter!");
+                    throw new Exception("Can not change state inside OnExit or OnEnter!");
                 }
                 _duringSetting = true;
 #endif
@@ -61,17 +61,14 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 状态变化后触发
-        /// </summary>
         protected virtual void StateChanged(T lastState, T currentState)
         {
         }
 
 
         /// <summary>
-        /// 更新当前状态
-        /// 注意: 顶层状态机需要主动调用
+        /// Update current state.
+        /// Note: top level state machine need call this.
         /// </summary>
         public override void OnUpdate(float deltaTime)
         {

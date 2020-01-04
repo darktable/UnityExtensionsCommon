@@ -1,14 +1,12 @@
 ﻿#if UNITY_EDITOR
 
-using System;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace UnityExtensions.Editor
 {
     /// <summary>
-    /// 编辑器 Application 工具箱
+    /// Utilities for editor.
     /// </summary>
     public struct EditorUtilities
     {

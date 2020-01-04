@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 栈状态机组件, 可作为一般状态机或子状态机使用
+    /// StackStateMachineComponent
     /// </summary>
     public class StackStateMachineComponent<T> : BaseStackStateComponent where T : class, IStackState
     {
@@ -14,37 +14,37 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 栈中状态的总数
+        /// Number of states in the stack.
         /// </summary>
         public int stateCount => _states.Count;
 
 
         /// <summary>
-        /// 当前状态持续时间
+        /// Total time since entering the current state.
         /// </summary>
         public float currentStateTime => (float)_currentStateTime;
 
 
         /// <summary>
-        /// 当前状态持续时间
+        /// Total time since entering the current state.
         /// </summary>
         public double currentStateTimeDouble => _currentStateTime;
 
 
         /// <summary>
-        /// 当前状态 (如果 stateCount 为 0 会抛出异常)
+        /// Current state (unusable if stateCount is zero)
         /// </summary>
         public T currentState => _states[_states.Count - 1];
 
 
         /// <summary>
-        /// 下方状态 (如果 stateCount 小于 2 会抛出异常)
+        /// The state under current state (unusable if stateCount is zero or one)
         /// </summary>
         public T underState => _states[_states.Count - 2];
 
 
         /// <summary>
-        /// 获取栈中的状态
+        /// Get the state in the stack by specified index.
         /// </summary>
         public T GetState(int index)
         {
@@ -58,14 +58,14 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将新状态入栈
+        /// Push a state to the stack (state can be null).
         /// </summary>
         public void PushState(T newState)
         {
 #if DEBUG
             if (_duringSetting)
             {
-                throw new Exception("Shouldn't change state inside OnExit or OnEnter!");
+                throw new Exception("Can not change state inside OnExit or OnEnter!");
             }
             _duringSetting = true;
 #endif
@@ -86,14 +86,14 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将当前状态出栈 (如果 stateCount 为 0 会抛出异常)
+        /// Pop current state from the stack (unusable if stateCount is zero).
         /// </summary>
         public void PopState()
         {
 #if DEBUG
             if (_duringSetting)
             {
-                throw new Exception("Shouldn't change state inside OnExit or OnEnter!");
+                throw new Exception("Can not change state inside OnExit or OnEnter!");
             }
             _duringSetting = true;
 #endif
@@ -116,7 +116,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将指定数量的状态出栈
+        /// Pop multi-states from the stack.
         /// </summary>
         public void PopStates(int count)
         {
@@ -129,7 +129,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将所有状态出栈
+        /// Pop all states from the stack.
         /// </summary>
         public void PopAllStates()
         {
@@ -138,7 +138,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 重置栈内所有状态并清空栈
+        /// Reset the stack.
         /// </summary>
         public void ResetStack()
         {
@@ -163,8 +163,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 更新当前状态
-        /// 注意: 顶层状态机需要主动调用
+        /// Update current state.
+        /// Note: top level state machine need call this.
         /// </summary>
         public override void OnUpdate(float deltaTime)
         {
@@ -185,9 +185,11 @@ namespace UnityExtensions
     [DisallowMultipleComponent]
     public class StackStateMachineComponent : StackStateMachineComponent<BaseStackStateComponent>
     {
+        public TimeMode timeMode = TimeMode.Unscaled;
+
         void Update()
         {
-            OnUpdate(Time.unscaledDeltaTime);
+            OnUpdate(timeMode == TimeMode.Normal ? Time.deltaTime : Time.unscaledDeltaTime);
         }
     }
 

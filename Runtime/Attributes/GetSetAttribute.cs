@@ -9,7 +9,7 @@ using UnityEditor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 使用属性替换字段显示和编辑
+    /// Use property instead of field
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class GetSetAttribute : PropertyAttribute

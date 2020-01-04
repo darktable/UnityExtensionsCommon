@@ -6,15 +6,15 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 数组扩展方法
+    /// Extensions for Array.
     /// </summary>
     public static partial class Extensions
     {
         /// <summary>
-        /// 设置一维数组中一个区段的元素的值
+        /// Set values of elements in an array.
         /// </summary>
-        /// <param name="index"> 开始设置值的下标 </param>
-        /// <param name="count"> 连续设置值的元素数, 非正值表示直到数组尾部 </param>
+        /// <param name="index"> Start index. </param>
+        /// <param name="count"> A negative or zero value means all elements after start index. </param>
         public static void SetValues<T>(
             this T[] array,
             T value = default,
@@ -27,12 +27,12 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置二维数组中一个区域的元素的值
+        /// Set values of elements in a 2d array.
         /// </summary>
-        /// <param name="beginRowIndex"> 区域开始的行下标 </param>
-        /// <param name="beginColIndex"> 区域开始的列下标 </param>
-        /// <param name="endRowIndex"> 区域结束的行下标, 非正值表示直到数组边界 </param>
-        /// <param name="endColIndex"> 区域结束的列下标, 非正值表示直到数组边界 </param>
+        /// <param name="beginRowIndex">  Start row index </param>
+        /// <param name="beginColIndex"> Start col index </param>
+        /// <param name="endRowIndex"> A negative or zero value means all elements after start index. </param>
+        /// <param name="endColIndex"> A negative or zero value means all elements after start index. </param>
         public static void SetValues<T>(
             this T[,] array,
             T value = default,
@@ -55,10 +55,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 找到一组元素中最接近的一个
+        /// Find the nearest element with specific value in an array.
         /// </summary>
-        /// <returns> 最接近的元素下标 </returns>
-        public static int FindNearest(this float[] items, float value)
+        public static int FindNearestIndex(this float[] items, float value)
         {
             if (RuntimeUtilities.IsNullOrEmpty(items)) return -1;
 
@@ -81,7 +80,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 修改 List<> 的元素数量, newValue 指定新添加的元素
+        /// Change the size of the list.
         /// </summary>
         public static void Resize<T>(this List<T> list, int newSize, T newValue = default)
         {
@@ -106,7 +105,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 修改 IList 的元素数量, newValue 指定新添加的元素
+        /// Change the size of the list.
         /// </summary>
         public static void Resize(this IList list, int newSize, object newValue = null)
         {
@@ -134,18 +133,20 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 对列表中一段元素排序
+        /// Sort elements part of the list.
         /// </summary>
-        /// <param name="index"> 参与排序元素的开始下标 </param>
-        /// <param name="count"> 参与排序的元素数量, 非正值表示直到列表尾部 </param>
+        /// <param name="index"> Start index </param>
+        /// <param name="count"> A negative or zero value means all elements after start index. </param>
         public static void Sort<T>(this IList<T> list, Comparison<T> compare, int index = 0, int count = 0)
         {
             if (count <= 0) count = list.Count - index;
             int lastIndex = index + count - 1;
             T temp;
+            bool changed;
 
             for (int i = 0; i < count - 1; i++)
             {
+                changed = false;
                 for (int j = index; j < lastIndex; j++)
                 {
                     if (compare(list[j], list[j+1]) > 0)
@@ -153,15 +154,17 @@ namespace UnityExtensions
                         temp = list[j];
                         list[j] = list[j+1];
                         list[j+1] = temp;
+                        changed = true;
                     }
                 }
+                if (!changed) break;
 
                 lastIndex--;
             }
         }
 
 
-        public static T GetLast<T>(this IList<T> list)
+        public static T Last<T>(this IList<T> list)
         {
             return list[list.Count - 1];
         }
@@ -176,12 +179,11 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 遍历任意维度的数组
+        /// Traverse any array.
         /// </summary>
-        /// <param name="array"> 执行遍历的数组 </param>
-        /// <param name="onElement"> 遍历到每一个数组元素时执行此方法, 参数 1 是当前元素从 0 开始的维度, 参数 2 是此元素在每个维度的下标组成的数组 </param>
-        /// <param name="beginDimension"> 遍历每个维度开始时执行此方法, 参数 1 是从 0 开始的当前维度值, 参数 2 是此维度之前每个维度的下标组成的数组 </param>
-        /// <param name="endDimension"> 遍历每个维度结束时执行此方法, 参数 1 是从 0 开始的当前维度值, 参数 2 是此维度之前每个维度的下标组成的数组 </param>
+        /// <param name="onElement"> param1 is dimension index, param2 is element indexes in every dimension </param>
+        /// <param name="beginDimension"> param1 is dimension index, param2 is indexes in every dimension before this dimension </param>
+        /// <param name="endDimension"> param1 is dimension index, param2 is indexes in every dimension before this dimension </param>
         public static void Traverse(
             this Array array,
             Action<int, int[]> onElement,
@@ -216,9 +218,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 获取数组内容的字符串描述, 该字符串与 C# 代码书写格式相似
-        /// 如果 elementToString 为 null 将使用默认方法, 即：
-        ///        空引用使用 “null” 表示, string 类型的两边会添加“"”, 其他类型通过 ToString() 获得描述
+        /// Get the text description of the array, the text is similar to C# code.
         /// </summary>
         public static string ToCodeString(this Array array, Func<object, string> elementToString = null)
         {

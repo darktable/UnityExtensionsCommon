@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace UnityExtensions
 {
-    /// <summary>
-    /// 三维范围
-    /// </summary>
     [Serializable]
     public struct Range3
     {
@@ -13,14 +10,12 @@ namespace UnityExtensions
         public Range y;
         public Range z;
 
-
         public Range3(Range x, Range y, Range z)
         {
             this.x = x;
             this.y = y;
             this.z = z;
         }
-
 
         public Range3(Vector3 min, Vector3 max)
         {
@@ -32,10 +27,6 @@ namespace UnityExtensions
             z.max = max.z;
         }
 
-
-        /// <summary>
-        /// min 顶点
-        /// </summary>
         public Vector3 min
         {
             get { return new Vector3(x.min, y.min, z.min); }
@@ -47,10 +38,6 @@ namespace UnityExtensions
             }
         }
 
-
-        /// <summary>
-        /// max 顶点
-        /// </summary>
         public Vector3 max
         {
             get { return new Vector3(x.max, y.max, z.max); }
@@ -62,11 +49,6 @@ namespace UnityExtensions
             }
         }
 
-
-        /// <summary>
-        /// 大小
-        /// 修改大小时维持中心不变
-        /// </summary>
         public Vector3 size
         {
             get { return new Vector3(x.size, y.size, z.size); }
@@ -78,11 +60,6 @@ namespace UnityExtensions
             }
         }
 
-
-        /// <summary>
-        /// 中心
-        /// 修改中心时维持大小不变
-        /// </summary>
         public Vector3 center
         {
             get { return new Vector3(x.center, y.center, z.center); }
@@ -94,10 +71,6 @@ namespace UnityExtensions
             }
         }
 
-
-        /// <summary>
-        /// 确保最小最大值关系正确
-        /// </summary>
         public void SortMinMax()
         {
             x.SortMinMax();
@@ -105,19 +78,11 @@ namespace UnityExtensions
             z.SortMinMax();
         }
 
-
-        /// <summary>
-        /// 判断是否包含某个点
-        /// </summary>
         public bool Contains(Vector3 point)
         {
             return x.Contains(point.x) && y.Contains(point.y) && z.Contains(point.z);
         }
 
-
-        /// <summary>
-        /// 获取范围内最接近给定点的点
-        /// </summary>
         public Vector3 Closest(Vector3 point)
         {
             point.x = x.Closest(point.x);
@@ -126,19 +91,11 @@ namespace UnityExtensions
             return point;
         }
 
-
-        /// <summary>
-        /// 判断是否与另一范围有交集
-        /// </summary>
         public bool Intersects(Range3 other)
         {
             return x.Intersects(other.x) && y.Intersects(other.y) && z.Intersects(other.z);
         }
 
-
-        /// <summary>
-        /// 获取两个范围的交集
-        /// </summary>
         public Range3 GetIntersection(Range3 other)
         {
             other.x = x.GetIntersection(other.x);
@@ -147,10 +104,6 @@ namespace UnityExtensions
             return other;
         }
 
-
-        /// <summary>
-        /// 获取有符号的距离向量. 负值表示目标小于最小值, 正值表示目标大于最大值
-        /// </summary>
         public Vector3 SignedDistance3(Vector3 point)
         {
             point.x = x.SignedDistance(point.x);
@@ -159,10 +112,6 @@ namespace UnityExtensions
             return point;
         }
 
-
-        /// <summary>
-        /// 获取点相对于此范围两个轴向上的距离
-        /// </summary>
         public Vector3 Distance3(Vector3 point)
         {
             point.x = x.Distance(point.x);
@@ -171,28 +120,16 @@ namespace UnityExtensions
             return point;
         }
 
-
-        /// <summary>
-        /// 获取点相对于范围的距离的平方
-        /// </summary>
         public float SqrDistance(Vector3 point)
         {
             return Distance3(point).sqrMagnitude;
         }
 
-
-        /// <summary>
-        /// 获取点相对于范围的距离
-        /// </summary>
         public float Distance(Vector3 point)
         {
             return Distance3(point).magnitude;
         }
 
-
-        /// <summary>
-        /// 扩展以包含指定点
-        /// </summary>
         public void Encapsulate(Vector3 point)
         {
             x.Encapsulate(point.x);
@@ -200,10 +137,6 @@ namespace UnityExtensions
             z.Encapsulate(point.z);
         }
 
-
-        /// <summary>
-        /// 扩展以包含指定范围
-        /// </summary>
         public void Encapsulate(Range3 other)
         {
             x.Encapsulate(other.x);
@@ -211,10 +144,6 @@ namespace UnityExtensions
             z.Encapsulate(other.z);
         }
 
-
-        /// <summary>
-        /// 扩展范围, 负值代表收缩
-        /// </summary>
         public void Expand(Vector3 delta)
         {
             x.Expand(delta.x);
@@ -222,10 +151,6 @@ namespace UnityExtensions
             z.Expand(delta.z);
         }
 
-
-        /// <summary>
-        /// 各方向等量扩展范围, 负值代表收缩
-        /// </summary>
         public void Expand(float delta)
         {
             x.Expand(delta);
@@ -233,10 +158,6 @@ namespace UnityExtensions
             z.Expand(delta);
         }
 
-
-        /// <summary>
-        /// 移动范围
-        /// </summary>
         public void Move(Vector3 delta)
         {
             x.Move(delta.x);

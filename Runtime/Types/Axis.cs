@@ -2,9 +2,8 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 轴
-    /// 因为对众多不同的定义感到厌烦，所以就定义了一个万能版本
-    /// 提示：可以为 Axis 字段添加 AxisUsageAttribute 以实现不同用途，另外有 AxisUtilities 可供使用
+    /// Axis
+    /// Note: Use AxisUsageAttribute to custom inspector, use AxisUtilities in you scripts.
     /// </summary>
     [System.Flags]
     public enum Axis
@@ -31,7 +30,7 @@ namespace UnityExtensions
 
 
     /// <summary>
-    /// 轴之间关系
+    /// The relation between two axis
     /// </summary>
     public enum AxisRelation
     {

@@ -5,103 +5,66 @@ using System.Threading.Tasks;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 队列化任务
+    /// Queued task
     /// </summary>
-    /// <typeparam name="TTask"></typeparam>
     public interface IQueuedTask<TTask> where TTask : IQueuedTask<TTask>
     {
         /// <summary>
-        /// 在添加任务之前触发，可以用来标记或删除过期任务
-        /// current 可能为 -1，表示任务都处理完了
+        /// Called before adding the task, can be used to delete overdue tasks.
         /// </summary>
+        /// <param name="current">The task processing currently, -1 means all tasks are done.</param>
+        /// <returns>True means this task can be added to the queue. </returns>
         bool BeforeEnqueue(QuickLinkedList<TTask> tasks, int current);
 
-
         /// <summary>
-        /// 处理任务，注意这是并行调用的
+        /// Process this task. Note this is called asynchronously.
         /// </summary>
         void Process();
 
-
         /// <summary>
-        /// 任务完成时触发
+        /// Called after this task completed.
         /// </summary>
         void AfterComplete();
     }
 
-
-    /// <summary>
-    /// 泛型默认实现
-    /// </summary>
     public abstract class QueuedTask<TTask> : IQueuedTask<TTask> where TTask : QueuedTask<TTask>
     {
-        /// <summary>
-        /// 在添加任务之前触发，可以用来标记或删除过期任务
-        /// current 可能为 -1，表示任务都处理完了
-        /// </summary>
-        public virtual bool BeforeEnqueue(QuickLinkedList<TTask> tasks, int current)
-        {
-            return true;
-        }
+        public virtual bool BeforeEnqueue(QuickLinkedList<TTask> tasks, int current) => true;
 
+        public virtual void Process() { }
 
-        /// <summary>
-        /// 处理任务，注意这可能是并行的
-        /// </summary>
-        public virtual void Process()
-        {
-        }
-
-
-        /// <summary>
-        /// 任务完成时触发
-        /// </summary>
-        public virtual void AfterComplete()
-        {
-        }
+        public virtual void AfterComplete() { }
     }
 
-
     /// <summary>
-    /// 默认实现
-    /// </summary>
-    public abstract class QueuedTask : QueuedTask<QueuedTask>
-    {
-    }
-
-
-    /// <summary>
-    /// 异步任务队列. 支持 Editor 环境
-    /// 添加任务时自动激活，完成任务后如果超过一定时间没有新的任务会自动停止
-    /// 也可以通过调用 Dispose 以手动停止
+    /// Async task queue, support edit-mode.
     /// </summary>
     public class AsyncTaskQueue<TTask> : IDisposable where TTask : IQueuedTask<TTask>
     {
         volatile bool _working;
 
         QuickLinkedList<TTask> _tasks;
-        volatile int _current;      // 正在进行的任务, -1 表示做完了任务
+        volatile int _current = -1; // -1 means all tasks are done
 
         AutoResetEvent _event;
         Task _taskThread;
 
-        float _waitToDispose;      // 完成任务后到自动停止的时间, 负值: 永不停止；0：立即停止；正值：等待停止的时间
-        float _timer;              // -1：尚未开始计时
+        float _waitToDispose;       // time to auto-dispose after all task completed, negative: never, zero: immediately, positive: seconds to wait
+        float _timer;               // -1: does not start
 
-        int _taskCount;
+        int _taskCount = 0;
 
 
         public bool hasTask => _taskCount > 0;
 
 
         /// <summary>
-        /// 添加一个新任务
+        /// Enqueue a new task.
         /// </summary>
-        /// <param name="task"></param>
-        /// <param name="waitToDispose"> 完成任务后到自动停止的时间, 负值永不停止；0立即停止；正值等待停止的秒数 </param>
+        /// <param name="waitToDispose"> time to auto-dispose after all task completed, negative: never, zero: immediately, positive: seconds to wait </param>
         public void Enqueue(TTask task, float waitToDispose)
         {
-            // 初始化
+            // Initialize
             if (!_working)
             {
                 _working = true;
@@ -118,7 +81,7 @@ namespace UnityExtensions
             _waitToDispose = waitToDispose;
             _timer = -1;
 
-            // 添加任务
+            // add task
             lock (_tasks)
             {
                 if (!task.BeforeEnqueue(_tasks, _current))
@@ -152,7 +115,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 删除所有未处理的任务
+        /// Delete all unprocessed task.
         /// </summary>
         public void ClearUnprocessed()
         {
@@ -179,7 +142,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 释放之前会等待所有任务完成。如果希望尽快结束，可以先调用 ClearUnprocessed
+        /// Dispose the task queue. It waits all tasks to be completed.
         /// </summary>
         public void Dispose()
         {
@@ -227,7 +190,6 @@ namespace UnityExtensions
 
                     if (_taskCount == 0)
                     {
-                        // 完成所有任务开始计时
                         if (_waitToDispose == 0) Dispose();
                         else _timer = 0;
                     }

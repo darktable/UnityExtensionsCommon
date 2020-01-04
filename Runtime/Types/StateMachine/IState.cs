@@ -2,22 +2,22 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 状态接口
+    /// State.
     /// </summary>
     public interface IState
     {
         /// <summary>
-        /// 进入状态时触发
+        /// Called when StateMachine enters this state.
         /// </summary>
         void OnEnter();
 
         /// <summary>
-        /// 离开状态时触发
+        /// Called when StateMachine quits this state.
         /// </summary>
         void OnExit();
 
         /// <summary>
-        /// 更新状态时触发
+        /// Called when StateMachine updates this state.
         /// </summary>
         void OnUpdate(float deltaTime);
 

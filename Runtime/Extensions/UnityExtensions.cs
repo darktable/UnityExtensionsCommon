@@ -7,12 +7,12 @@ using UnityEngine.EventSystems;
 namespace UnityExtensions
 {
     /// <summary>
-    /// Unity 内置类型扩展
+    /// Extensions for Unity.
     /// </summary>
     public static partial class Extensions
     {
         /// <summary>
-        /// 安全获取组件. 如果物体上没有组件则自动添加
+        /// Get component if it exists or add a new one.
         /// </summary>
         public static T GetComponentSafely<T>(this GameObject target) where T : Component
         {
@@ -25,7 +25,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 安全获取组件. 如果物体上没有组件则自动添加
+        /// Get component if it exists or add a new one.
         /// </summary>
         public static T GetComponentSafely<T>(this Component target) where T : Component
         {
@@ -34,7 +34,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 访问 UI 游戏对象的 RectTransform 组件
+        /// Get the RectTransform component.
         /// </summary>
         public static RectTransform rectTransform(this Component target)
         {
@@ -43,7 +43,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 访问 UI 游戏对象的 RectTransform 组件
+        /// Get the RectTransform component.
         /// </summary>
         public static RectTransform rectTransform(this GameObject target)
         {
@@ -52,12 +52,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 延时调用指定的方法
+        /// Delay invoking (scaled time).
         /// </summary>
-        /// <param name="behaviour"> 协程附着的脚本对象 </param>
-        /// <param name="delay"> 延迟时间(秒) </param>
-        /// <param name="action"> 延时结束调用的方法 </param>
-        public static void DelayInvoking(this MonoBehaviour behaviour, float delay, Action action)
+        public static void Delay(this MonoBehaviour behaviour, float delay, Action action)
         {
             behaviour.StartCoroutine(DelayedCoroutine());
 
@@ -70,7 +67,22 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 重置 Transform 的 localPosition, localRotation 和 localScale
+        /// Delay invoking (unscaled time).
+        /// </summary>
+        public static void DelayRealtime(this MonoBehaviour behaviour, float delay, Action action)
+        {
+            behaviour.StartCoroutine(DelayedCoroutine());
+
+            IEnumerator DelayedCoroutine()
+            {
+                yield return new WaitForSecondsRealtime(delay);
+                action();
+            }
+        }
+
+
+        /// <summary>
+        /// Reset localPosition, localRotation and localScale of transform.
         /// </summary>
         public static void ResetLocal(this Transform transform)
         {
@@ -81,7 +93,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 localPosition.x
+        /// Set localPosition.x
         /// </summary>
         public static void SetLocalPositionX(this Transform transform, float x)
         {
@@ -92,7 +104,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 localPosition.y
+        /// Set localPosition.y
         /// </summary>
         public static void SetLocalPositionY(this Transform transform, float y)
         {
@@ -103,7 +115,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 localPosition.z
+        /// Set localPosition.z
         /// </summary>
         public static void SetLocalPositionZ(this Transform transform, float z)
         {
@@ -114,7 +126,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchoredPosition.x
+        /// Set anchoredPosition.x
         /// </summary>
         public static void SetAnchoredPositionX(this RectTransform rectTransform, float x)
         {
@@ -125,7 +137,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchoredPosition.y
+        /// Set anchoredPosition.y
         /// </summary>
         public static void SetAnchoredPositionY(this RectTransform rectTransform, float y)
         {
@@ -136,7 +148,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 sizeDelta.x
+        /// Set sizeDelta.x
         /// </summary>
         public static void SetSizeDeltaX(this RectTransform rectTransform, float x)
         {
@@ -147,7 +159,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 sizeDelta.y
+        /// Set sizeDelta.y
         /// </summary>
         public static void SetSizeDeltaY(this RectTransform rectTransform, float y)
         {
@@ -158,7 +170,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchorMin.x
+        /// Set anchorMin.x
         /// </summary>
         public static void SetAnchorMinX(this RectTransform rectTransform, float x)
         {
@@ -169,7 +181,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchorMin.y
+        /// Set anchorMin.y
         /// </summary>
         public static void SetAnchorMinY(this RectTransform rectTransform, float y)
         {
@@ -180,7 +192,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchorMax.x
+        /// Set anchorMax.x
         /// </summary>
         public static void SetAnchorMaxX(this RectTransform rectTransform, float x)
         {
@@ -191,7 +203,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 anchorMax.y
+        /// Set anchorMax.y
         /// </summary>
         public static void SetAnchorMaxY(this RectTransform rectTransform, float y)
         {
@@ -202,7 +214,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 pivot.x
+        /// Set pivot.x
         /// </summary>
         public static void SetPivotX(this RectTransform rectTransform, float x)
         {
@@ -213,7 +225,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 设置 pivot.y
+        /// Set pivot.y
         /// </summary>
         public static void SetPivotY(this RectTransform rectTransform, float y)
         {
@@ -224,11 +236,11 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 遍历 Transform 层级（根节点优先）, 对每一个节点执行一个自定义的操作
+        /// Traverse transform tree (root node first).
         /// </summary>
-        /// <param name="root"> 遍历开始的根部 Transform 对象 </param>
-        /// <param name="operate"> 遍历到每一个节点时将调用此方法 </param>
-        /// <param name="depthLimit"> 访问深度限制, 负值表示不限制, 0 表示只访问 root 本身而不访问其子级, 正值表示最多访问的子级层数 </param>
+        /// <param name="root"> The root node of transform tree. </param>
+        /// <param name="operate"> A custom operation on every transform node. </param>
+        /// <param name="depthLimit"> Negative value means no limit, zero means root only, positive value means maximum children depth </param>
         public static void TraverseHierarchy(this Transform root, Action<Transform> operate, int depthLimit = -1)
         {
             operate(root);
@@ -245,11 +257,11 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 反向遍历 Transform 层级（叶子节点优先）, 对每一个节点执行一个自定义的操作
+        /// Traverse transform tree (leaf node first).
         /// </summary>
-        /// <param name="root"> 树的根部 Transform 对象 </param>
-        /// <param name="operate"> 遍历到每一个节点时将调用此方法 </param>
-        /// <param name="depthLimit"> 访问深度限制, 负值表示不限制, 0 表示只访问 root 本身而不访问其子级, 正值表示最多访问的子级层数 </param>
+        /// <param name="root"> The root node of transform tree. </param>
+        /// <param name="operate"> A custom operation on every transform node. </param>
+        /// <param name="depthLimit"> Negative value means no limit, zero means root only, positive value means maximum children depth </param>
         public static void InverseTraverseHierarchy(this Transform root, Action<Transform> operate, int depthLimit = -1)
         {
             if (depthLimit != 0)
@@ -266,12 +278,12 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 遍历 Transform 层级（根节点优先）, 判断每一个节点是否为查找目标, 发现查找目标则立即终止查找
+        /// Find a transform in the transform tree (root node first)
         /// </summary>
-        /// <param name="root"> 遍历开始的根部 Transform 对象 </param>
-        /// <param name="match"> 判断当前节点是否为查找目标 </param>
-        /// <param name="depthLimit"> 遍历深度限制, 负值表示不限制, 0 表示只访问 root 本身而不访问其子级, 正值表示最多访问的子级层数 </param>
-        /// <returns> 如果查找到目标则返回此目标; 否则返回 null </returns>
+        /// <param name="root"> The root node of transform tree. </param>
+        /// <param name="match"> match function. </param>
+        /// <param name="depthLimit"> Negative value means no limit, zero means root only, positive value means maximum children depth </param>
+        /// <returns> The matched node or null if no matched. </returns>
         public static Transform SearchHierarchy(this Transform root, Predicate<Transform> match, int depthLimit = -1)
         {
             if (match(root)) return root;
@@ -309,7 +321,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 获取两个矩形的交集
+        /// Get the overlapped rect.
         /// </summary>
         public static Rect GetIntersection(this Rect rect, Rect other)
         {
@@ -340,7 +352,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 复制 AnimationCurve 实例
+        /// Clone the AnimationCurve instance.
         /// </summary>
         public static AnimationCurve Clone(this AnimationCurve target)
         {
@@ -353,7 +365,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 复制 Gradient 实例
+        /// Clone the Gradient instance.
         /// </summary>
         public static Gradient Clone(this Gradient target)
         {
@@ -405,9 +417,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 将屏幕尺寸转化为世界尺寸
-        /// </summary>
         public static float ScreenToWorldSize(this Camera camera, float pixelSize, float clipPlane)
         {
             if (camera.orthographic)
@@ -421,9 +430,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 将世界尺寸转化为屏幕尺寸
-        /// </summary>
         public static float WorldToScreenSize(this Camera camera, float worldSize, float clipPlane)
         {
             if (camera.orthographic)
@@ -437,9 +443,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 将世界平面转化为相机裁剪面
-        /// </summary>
         public static Vector4 GetClipPlane(this Camera camera, Vector3 point, Vector3 normal)
         {
             Matrix4x4 wtoc = camera.worldToCameraMatrix;
@@ -451,7 +454,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算 ZBufferParams, 可用于 compute shader 
+        /// Calculate ZBufferParams, can used in compute shader 
         /// </summary>
         public static Vector4 GetZBufferParams(this Camera camera)
         {
@@ -468,9 +471,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 为 EventTrigger 添加事件
-        /// </summary>
         public static void AddListener(this EventTrigger eventTrigger, EventTriggerType type, UnityAction<BaseEventData> callback)
         {
             var triggers = eventTrigger.triggers;
@@ -489,9 +489,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 为 EventTrigger 移除事件
-        /// </summary>
         public static void RemoveListener(this EventTrigger eventTrigger, EventTriggerType type, UnityAction<BaseEventData> callback)
         {
             var triggers = eventTrigger.triggers;

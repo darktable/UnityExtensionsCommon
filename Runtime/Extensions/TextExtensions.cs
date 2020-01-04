@@ -2,7 +2,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 文本处理相关扩展
+    /// Extensions for string.
     /// </summary>
     public static partial class Extensions
     {

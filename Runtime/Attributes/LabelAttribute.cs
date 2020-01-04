@@ -9,7 +9,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在一个字段上, 可以替换显示的 Label
+    /// Change the label text of a field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class LabelAttribute : PropertyAttribute

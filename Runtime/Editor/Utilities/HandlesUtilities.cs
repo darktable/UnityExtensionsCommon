@@ -7,7 +7,7 @@ using UnityEditor.IMGUI.Controls;
 namespace UnityExtensions.Editor
 {
     /// <summary>
-    /// Handles 工具箱
+    /// Handles Utilities.
     /// </summary>
     public struct HandlesUtilities
     {
@@ -48,9 +48,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制抗锯齿线段
-        /// </summary>
         public static void DrawAALine(Vector3 point1, Vector3 point2)
         {
             _segmentVertices[0] = point1;
@@ -59,9 +56,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制抗锯齿线段
-        /// </summary>
         public static void DrawAALine(Vector3 point1, Vector3 point2, float width)
         {
             _segmentVertices[0] = point1;
@@ -70,9 +64,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 bounds 的线框
-        /// </summary>
         public static void DrawWireBounds(Bounds bounds)
         {
             Vector3 min = bounds.min;
@@ -98,9 +89,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制球体的轮廓
-        /// </summary>
         public static void DrawSphereOutline(Vector3 center, float radius)
         {
             var cameraTrans = Camera.current.transform;
@@ -117,9 +105,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Box 调节框
-        /// </summary>
         public static void BoxHandle(ref Vector3 center, ref Vector3 size, Color color)
         {
             boxBoundsHandle.center = center;
@@ -131,9 +116,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Box 调节框
-        /// </summary>
         public static Bounds BoxHandle(Bounds bounds, Color color)
         {
             boxBoundsHandle.center = bounds.center;
@@ -146,9 +128,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Box 调节框
-        /// </summary>
         public static Bounds BoxHandle(Transform transform, Bounds bounds, Color color)
         {
             using (HandlesMatrixScope.New(transform.localToWorldMatrix))
@@ -158,18 +137,12 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Box 调节框
-        /// </summary>
         public static void BoxHandle(SerializedProperty boundsProperty, Color color)
         {
             boundsProperty.boundsValue = BoxHandle(boundsProperty.boundsValue, color);
         }
 
 
-        /// <summary>
-        /// 绘制 Box 调节框
-        /// </summary>
         public static void BoxHandle(Transform transform, SerializedProperty boundsProperty, Color color)
         {
             using (HandlesMatrixScope.New(transform.localToWorldMatrix))
@@ -179,9 +152,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Sphere 调节框
-        /// </summary>
         public static void SphereHandle(ref Vector3 center, ref float radius, Color color)
         {
             sphereBoundsHandle.center = center;
@@ -193,9 +163,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Sphere 调节框
-        /// </summary>
         public static void SphereHandle(Transform transform, ref Vector3 center, ref float radius, Color color)
         {
             using (HandlesMatrixScope.New(transform.localToWorldMatrix))
@@ -205,9 +172,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Sphere 调节框
-        /// </summary>
         public static void SphereHandle(SerializedProperty center, SerializedProperty radius, Color color)
         {
             sphereBoundsHandle.center = center.vector3Value;
@@ -219,9 +183,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Sphere 调节框
-        /// </summary>
         public static void SphereHandle(Transform transform, SerializedProperty center, SerializedProperty radius, Color color)
         {
             using (HandlesMatrixScope.New(transform.localToWorldMatrix))
@@ -231,9 +192,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Capsule 调节框
-        /// </summary>
         public static void CapsuleHandle(ref Vector3 center, ref float radius, ref float height, Color color, CapsuleBoundsHandle.HeightAxis axis)
         {
             capsuleBoundsHandle.center = center;
@@ -248,9 +206,6 @@ namespace UnityExtensions.Editor
         }
 
 
-        /// <summary>
-        /// 绘制 Capsule 调节框
-        /// </summary>
         public static void CapsuleHandle(Transform transform, ref Vector3 center, ref float radius, ref float height, Color color, CapsuleBoundsHandle.HeightAxis axis)
         {
             using (HandlesMatrixScope.New(transform.localToWorldMatrix))

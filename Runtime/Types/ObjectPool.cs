@@ -3,26 +3,29 @@ using System.Collections.Generic;
 
 namespace UnityExtensions
 {
-    public class ObjectPool<T> where T : class, new()
+    public abstract class BaseObjectPool<T> where T : class
     {
         Stack<T> _objects;
 
 
-        public int count { get { return _objects.Count; } }
+        public int count => _objects.Count;
 
 
-        public ObjectPool(int preallocateCount = 0)
+        public BaseObjectPool(int preallocateCount = 0)
         {
             _objects = new Stack<T>(preallocateCount > 16 ? preallocateCount : 16);
             AddObjects(preallocateCount);
         }
 
 
+        protected abstract T CreateInstance();
+
+
         public void AddObjects(int quantity)
         {
             while (quantity > 0)
             {
-                _objects.Push(new T());
+                _objects.Push(CreateInstance());
 
                 quantity--;
             }
@@ -32,7 +35,7 @@ namespace UnityExtensions
         public T Spawn()
         {
             if (_objects.Count > 0) return _objects.Pop();
-            return new T();
+            return CreateInstance();
         }
 
 
@@ -51,9 +54,9 @@ namespace UnityExtensions
         public struct TempObject : IDisposable
         {
             public T item { get; private set; }
-            ObjectPool<T> _pool;
+            BaseObjectPool<T> _pool;
 
-            public TempObject(ObjectPool<T> objectPool)
+            public TempObject(BaseObjectPool<T> objectPool)
             {
                 item = objectPool.Spawn();
                 _pool = objectPool;
@@ -68,6 +71,14 @@ namespace UnityExtensions
                 _pool = null;
             }
         }
+
+    } // class BaseObjectPool
+
+    public class ObjectPool<T> : BaseObjectPool<T> where T : class, new()
+    {
+        protected override T CreateInstance() => new T();
+
+        public ObjectPool(int preallocateCount = 0) : base(preallocateCount) { }
 
     } // class ObjectPool
 

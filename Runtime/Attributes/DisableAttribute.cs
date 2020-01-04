@@ -10,7 +10,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在一个字段上, 根据指定的 Property 或 Field 决定是否禁用编辑
+    /// DisableAttribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class DisableAttribute : PropertyAttribute

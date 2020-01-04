@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// Random 扩展
+    /// Extensions for Random.
     /// </summary>
     public static partial class Extensions
     {
@@ -79,12 +79,10 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 从一组元素中选择一个. 如果所有元素被选中概率之和小于 1, 那么最后一个元素被选中概率相应增加
+        /// Choose one element in a group. If sum of probabilities is smaller than 1, the probability of last element will be increased.
         /// </summary>
-        /// <param name="getProbability"> 每个元素被选中的概率 </param>
-        /// <param name="startIndex"> 开始遍历的索引 </param>
-        /// <param name="count"> 遍历元素的数量 </param>
-        /// <returns> 被选中的元素索引 </returns>
+        /// <param name="getProbability"> The probability of every element. </param>
+        /// <returns> The index of the chosen one. </returns>
         public static int Choose(this ref Random random, Func<int, float> getProbability, int startIndex, int count)
         {
             int lastIndex = startIndex + count - 1;
@@ -103,12 +101,11 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 从一组元素中选择一个. 如果所有元素被选中概率之和小于 1, 那么最后一个元素被选中概率相应增加
+        /// Choose one element in a group. If sum of probabilities is smaller than 1, the probability of last element will be increased.
         /// </summary>
-        /// <param name="probabilities"> 每个元素被选中的概率 </param>
-        /// <param name="startIndex"> 开始遍历的索引 </param>
-        /// <param name="count"> 遍历元素的数量. 如果这个值无效, 自动遍历到列表尾部 </param>
-        /// <returns> 被选中的元素索引 </returns>
+        /// <param name="probabilities"> The probability of every element. </param>
+        /// <param name="count"> A negative or zero value means all elements after start index. </param>
+        /// <returns> The index of the chosen one. </returns>
         public static int Choose(this ref Random random, IList<float> probabilities, int startIndex = 0, int count = 0)
         {
             if (count < 1 || count > probabilities.Count - startIndex)
@@ -132,12 +129,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将一组元素随机排序
+        /// Random sort the list.
         /// </summary>
-        /// <typeparam name="T"> 元素类型 </typeparam>
-        /// <param name="list"> 元素列表 </param>
-        /// <param name="startIndex"> 开始排序的索引 </param>
-        /// <param name="count"> 执行排序的元素总数. 如果这个值无效, 自动遍历到列表尾部 </param>
+        /// <param name="count"> A negative or zero value means all elements after start index. </param>
         public static void Sort<T>(this ref Random random, IList<T> list, int startIndex = 0, int count = 0)
         {
             int lastIndex = startIndex + count;

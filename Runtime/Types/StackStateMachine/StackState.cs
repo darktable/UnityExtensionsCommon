@@ -5,7 +5,7 @@ using UnityEngine.Events;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 栈状态基类
+    /// BaseStackState
     /// </summary>
     public abstract class BaseStackState : IStackState
     {
@@ -23,7 +23,7 @@ namespace UnityExtensions
 
 
     /// <summary>
-    /// 可序列化栈状态. 状态的 Enter 和 Exit 事件可序列化
+    /// StackState. OnEnter & OnExit can be serialized.
     /// </summary>
     [Serializable]
     public class StackState : BaseStackState
@@ -34,9 +34,6 @@ namespace UnityExtensions
         [SerializeField]
         StackStateEvent _onExit = default;
 
-        /// <summary>
-        /// 添加或移除进入状态触发的事件
-        /// </summary>
         public event UnityAction<StackAction> onEnter
         {
             add
@@ -47,10 +44,6 @@ namespace UnityExtensions
             remove { _onEnter?.RemoveListener(value); }
         }
 
-
-        /// <summary>
-        /// 添加或移除离开状态触发的事件
-        /// </summary>
         public event UnityAction<StackAction> onExit
         {
             add

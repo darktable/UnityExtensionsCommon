@@ -3,7 +3,7 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 通过配置的方式选择 UpdateMode
+    /// A component you can select UpdateMode
     /// </summary>
     public abstract class ConfigurableUpdateComponent : ScriptableComponent
     {
@@ -15,7 +15,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 更新模式
+        /// Update mode
         /// </summary>
         public UpdateMode updateMode
         {

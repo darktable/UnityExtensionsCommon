@@ -8,7 +8,7 @@ using UnityEditor;
 namespace UnityExtensions.Editor
 {
     /// <summary>
-    /// 菜单项状态
+    /// Menu item states.
     /// </summary>
     public enum MenuItemState
     {
@@ -19,7 +19,7 @@ namespace UnityExtensions.Editor
 
 
     /// <summary>
-    /// 编辑器 UI 工具箱
+    /// Utilities for editor GUI.
     /// </summary>
     public partial struct EditorGUIUtilities
     {
@@ -149,7 +149,7 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 获取临时的 GUIContent（避免 GC，仅用于临时绘制）
+        /// Get a temporary GUIContent（use this to avoid GC).
         /// </summary>
         public static GUIContent TempContent(string text = null, Texture image = null, string tooltip = null)
         {
@@ -162,11 +162,8 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 绘制矩形边框
+        /// Draw a rect wireframe.
         /// </summary>
-        /// <param name="rect"> 矩形 </param>
-        /// <param name="color"> 边框颜色 </param>
-        /// <param name="borderWidth"> 边框宽度 </param>
         public static void DrawWireRect(Rect rect, Color color, float borderWidth = 1f)
         {
             Rect border = new Rect(rect.x, rect.y, rect.width, borderWidth);
@@ -183,7 +180,7 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 绘制一个单行高且缩进的按钮
+        /// Draw a indented button.
         /// </summary>
         public static bool IndentedButton(string text)
         {
@@ -194,7 +191,7 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 绘制一个单行高且缩进的开关按钮
+        /// Draw a indented toggle-button.
         /// </summary>
         public static bool IndentedToggleButton(string text, bool value)
         {
@@ -272,7 +269,7 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 拖动鼠标以修改数值
+        /// Drag mouse to change value.
         /// </summary>
         public static float DragValue(Rect rect, float value, float sensitivity)
         {
@@ -337,7 +334,7 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 拖动鼠标以修改数值
+        /// Drag mouse to change value.
         /// </summary>
         public static float DragValue(Rect rect, GUIContent content, float value, float sensitivity, GUIStyle style)
         {
@@ -347,13 +344,8 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 绘制可拖动的进度条控件
+        /// Draw a progress bar that can be dragged.
         /// </summary>
-        /// <param name="rect"> 绘制的矩形范围 </param>
-        /// <param name="value01"> [0, 1] 范围的进度 </param>
-        /// <param name="backgroundColor"> 背景色 </param>
-        /// <param name="foregroundColor"> 进度填充色 </param>
-        /// <returns> 用户修改后的进度 </returns>
         public static float DragProgress(
             Rect rect,
             float value01,
@@ -420,15 +412,8 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 绘制可拖动的进度条控件
+        /// Draw a progress bar that can be dragged.
         /// </summary>
-        /// <param name="rect"> 绘制的矩形范围 </param>
-        /// <param name="value01"> [0, 1] 范围的进度 </param>
-        /// <param name="backgroundColor"> 背景色 </param>
-        /// <param name="foregroundColor"> 进度填充色 </param>
-        /// <param name="borderColor"> 绘制的边界框颜色 </param>
-        /// <param name="drawForegroundBorder"> 是否绘制进度条右侧的边界线 </param>
-        /// <returns> 用户修改后的进度 </returns>
         public static float DragProgress(
             Rect rect,
             float value01,
@@ -456,13 +441,12 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 创建菜单
+        /// Create a menu.
         /// </summary>
-        /// <param name="itemCount"> 菜单项总数, 包括所有级别的菜单项和分隔符 </param>
-        /// <param name="getItemContent"> 获取菜单项内容, 分割符必须以 "/" 结尾 </param>
-        /// <param name="getItemState"> 获取菜单项状态, 不会对分隔符获取状态 </param>
-        /// <param name="onSelect"> 菜单项被选中的回调 </param>
-        /// <returns> 创建好的菜单, 接下来可以通过调用 DropDown 或 ShowAsContext 来显示菜单 </returns>
+        /// <param name="itemCount"> Number of items, include separators and childs. </param>
+        /// <param name="getItemContent"> Get content of an item, a separator must ends with '/' </param>
+        /// <param name="getItemState"> Get state of an item </param>
+        /// <returns> The created menu, use DropDown or ShowAsContext to show it. </returns>
         public static GenericMenu CreateMenu(
             int itemCount,
             Func<int, GUIContent> getItemContent,
@@ -500,13 +484,12 @@ namespace UnityExtensions.Editor
 
 
         /// <summary>
-        /// 创建菜单
+        /// Create a menu.
         /// </summary>
-        /// <param name="items"> 元素集合 </param>
-        /// <param name="getItemContent"> 获取菜单项内容, 分割符必须以 "/" 结尾 </param>
-        /// <param name="getItemState"> 获取菜单项状态, 不会对分隔符获取状态 </param>
-        /// <param name="onSelect"> 菜单项被选中的回调 </param>
-        /// <returns> 创建好的菜单, 接下来可以通过调用 DropDown 或 ShowAsContext 来显示菜单 </returns>
+        /// <param name="itemCount"> Number of items, include separators and childs. </param>
+        /// <param name="getItemContent"> Get content of an item, a separator must ends with '/' </param>
+        /// <param name="getItemState"> Get state of an item </param>
+        /// <returns> The created menu, use DropDown or ShowAsContext to show it. </returns>
         public static GenericMenu CreateMenu<T>(
             IEnumerable<T> items,
             Func<T, GUIContent> getItemContent,

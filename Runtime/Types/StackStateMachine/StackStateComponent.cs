@@ -1,11 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace UnityExtensions
 {
     /// <summary>
-    /// 栈状态组件基类
+    /// BaseStackStateComponent
     /// </summary>
     public abstract class BaseStackStateComponent : ScriptableComponent, IStackState
     {
@@ -17,7 +16,7 @@ namespace UnityExtensions
 
 
     /// <summary>
-    /// 栈状态组件. 状态的 Enter 和 Exit 事件可序列化
+    /// StackStateComponent. OnEnter & OnExit can be serialized.
     /// </summary>
     [AddComponentMenu("State Machines/Stack State Component")]
     [DisallowMultipleComponent]
@@ -29,10 +28,6 @@ namespace UnityExtensions
         [SerializeField]
         StackStateEvent _onExit = default;
 
-
-        /// <summary>
-        /// 添加或移除进入状态触发的事件
-        /// </summary>
         public event UnityAction<StackAction> onEnter
         {
             add
@@ -43,10 +38,6 @@ namespace UnityExtensions
             remove { _onEnter?.RemoveListener(value); }
         }
 
-
-        /// <summary>
-        /// 添加或移除离开状态触发的事件
-        /// </summary>
         public event UnityAction<StackAction> onExit
         {
             add

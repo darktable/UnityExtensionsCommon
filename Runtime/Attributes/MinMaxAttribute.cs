@@ -9,13 +9,13 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 让 int 或 float 字段的值限制在指定范围
+    /// Set minimum & maximum allowed values for int & float field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class MinMaxAttribute : PropertyAttribute
     {
         /// <summary>
-        /// 让 int 或 float 字段的值限制在指定范围
+        /// Set minimum & maximum allowed values for int & float field
         /// </summary>
         public MinMaxAttribute(float min, float max)
         {

@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-
+﻿
 namespace UnityExtensions
 {
     [System.Flags]

@@ -10,7 +10,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 标记在一个字段上, 根据指定的 Property 或 Field 决定是否隐藏编辑
+    /// Hide a field
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class HideAttribute : PropertyAttribute
