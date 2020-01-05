@@ -132,6 +132,35 @@ namespace UnityExtensions.Editor
             return results;
         }
 
+
+        public static void AddPreloadedAsset(Object assetObject)
+        {
+            if (!assetObject) return;
+
+            var assets = PlayerSettings.GetPreloadedAssets();
+
+            bool added = false;
+
+            if (assets != null)
+            {
+                if (ArrayUtility.Contains(assets, assetObject)) return;
+
+                for (int i = 0; i < assets.Length; i++)
+                {
+                    if (!assets[i])
+                    {
+                        assets[i] = assetObject;
+                        added = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!added) ArrayUtility.Add(ref assets, assetObject);
+
+            PlayerSettings.SetPreloadedAssets(assets);
+        }
+
     } // struct AssetUtilities
 
 } // namespace UnityExtensions.Editor

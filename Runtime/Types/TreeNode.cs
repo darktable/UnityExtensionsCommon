@@ -4,15 +4,14 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 树节点
-    /// 在内部, 一个节点的子节点被组织为双向链表
+    /// TreeNode
     /// </summary>
     [Serializable]
     public class TreeNode<Node> where Node : TreeNode<Node>
     {
         [SerializeReference] Node _parent;
         [SerializeReference] Node _next;
-        [SerializeReference] Node _previous;        // 第一个子节点的 previous 指向链表尾部, 以便访问最后一个子节点
+        [SerializeReference] Node _previous;        // the previous of first child references the last child
         [SerializeReference] Node _firstChild;
 
 
@@ -188,49 +187,49 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 父节点. 如果没有父节点返回 null
+        /// Parent node, return null if it does not exist.
         /// </summary>
         public Node parent => _parent;
 
 
         /// <summary>
-        /// 同层级中后一个节点. 如果此节点是最后一个则返回 null
+        /// Next node in the same hierarchy, return null if this node is the last one.
         /// </summary>
         public Node next => _next;
 
 
         /// <summary>
-        /// 同层级中前一个节点. 如果此节点是第一个则返回 null
+        /// Previous node in the same hierarchy, return null if this node is the first one.
         /// </summary>
         public Node previous => (_parent != null && _parent._firstChild == this) ? null : _previous;
 
 
         /// <summary>
-        /// 第一个直接子节点. 如果没有子节点返回 null
+        /// First child node, return null if no child.
         /// </summary>
         public Node firstChild => _firstChild;
 
 
         /// <summary>
-        /// 最后一个直接子节点. 如果没有子节点返回 null
+        /// Last child node, return null if no child.
         /// </summary>
         public Node lastChild => _firstChild?._previous;
 
 
         /// <summary>
-        /// 是否为根节点
+        /// Is this node a root node?
         /// </summary>
         public bool isRoot => _parent == null;
 
 
         /// <summary>
-        /// 是否为叶子节点
+        /// Is this node a leaf node?
         /// </summary>
         public bool isLeaf => _firstChild == null;
 
 
         /// <summary>
-        /// 直接子节点总数. O(n), n 为直接子节点数量
+        /// Number of direct children. Time complexity: O(n) - n is number of direct children.
         /// </summary>
         public int directChildCount
         {
@@ -249,7 +248,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 深度. 一个根节点的深度是 0. O(n), n 为节点深度
+        /// Depth of this node. Depth of a root node is zero. Time complexity: O(n) - n is depth of this node.
         /// </summary>
         public int depth
         {
@@ -268,7 +267,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 根节点. O(n), n 为节点深度
+        /// Root node of this tree. Time complexity: O(n) - n is depth of this node.
         /// </summary>
         public Node root
         {
@@ -285,29 +284,29 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 获取一个用以 foreach 所有子节点的 Enumerable 对象 (包括自身)
-        /// 注意: 在遍历过程中修改树的结构可能造成错误
+        /// Get a enumerable instance to foreach all children (include this node).
+        /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
         public ChildrenEnumerable children => new ChildrenEnumerable(this as Node);
 
 
         /// <summary>
-        /// 获取一个用以 foreach 所有父节点的 Enumerable 对象 (包括自身)
-        /// 注意: 在遍历过程中修改树的结构可能造成错误
+        /// Get a enumerable instance to foreach all parents (include this node).
+        /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
         public ParentsEnumerable parents => new ParentsEnumerable(this as Node);
 
 
         /// <summary>
-        /// 获取一个用以 foreach 所有直接子节点的 Enumerable 对象
-        /// 注意: 在遍历过程中修改树的结构可能造成错误
+        /// Get a enumerable instance to foreach all direct children.
+        /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
         public DirectChildrenEnumerable directChildren => new DirectChildrenEnumerable(this as Node);
 
 
         /// <summary>
-        /// 作为第一个子节点附着到一个父节点下
-        /// 注意: 为性能考虑, 未检查 parent 是否存在于当前节点为根的子树中. 要启用此检查, 请添加定义: TREE_NODE_STRICT
+        /// Attach to a specified node as the first child.
+        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAsFirst(Node parent)
         {
@@ -332,8 +331,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 作为最后一个子节点附着到一个父节点下
-        /// 注意: 为性能考虑, 未检查 parent 是否存在于当前节点为根的子树中. 要启用此检查, 请添加定义: TREE_NODE_STRICT
+        /// Attach to a specified node as the last child.
+        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAsLast(Node parent)
         {
@@ -357,8 +356,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 附着到一个父节点下的某个子节点之前
-        /// 注意: 为性能考虑, 未检查 parent 是否存在于当前节点为根的子树中. 要启用此检查, 请添加定义: TREE_NODE_STRICT
+        /// Attach to a specified node before a child of it.
+        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachBefore(Node parent, Node next)
         {
@@ -380,8 +379,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 附着到一个父节点下的某个子节点之后
-        /// 注意: 为性能考虑, 未检查 parent 是否存在于当前节点为根的子树中. 要启用此检查, 请添加定义: TREE_NODE_STRICT
+        /// Attach to a specified node after a child of it.
+        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAfter(Node parent, Node previous)
         {
@@ -398,7 +397,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 从父节点脱离
+        /// Detach from parent node.
         /// </summary>
         public void DetachParent()
         {
@@ -423,7 +422,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 分离所有直接子节点
+        /// Detach from all direct children.
         /// </summary>
         public void DetachChildren()
         {
@@ -444,7 +443,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 是否存在于某个节点为根的子树中
+        /// Is this node a child of a specified node?
         /// </summary>
         public bool IsChildOf(Node parent)
         {
@@ -467,7 +466,6 @@ namespace UnityExtensions
 
         #region Internal
 
-        // 验证 Attach 操作
         void InternalValidateAttaching(Node parent)
         {
             if (_parent != null)
@@ -487,7 +485,6 @@ namespace UnityExtensions
         }
 
 
-        // 验证一个节点是否为 parent 的子节点
         void InternalValidateChild(Node node)
         {
             if (node == null)

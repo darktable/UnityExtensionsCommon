@@ -3,13 +3,12 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// Axis 工具箱
+    /// Axis Utilities 
     /// </summary>
     public struct AxisUtilities
     {
         /// <summary>
-        /// 转换为轴对齐的方向向量
-        /// 仅当 axis 是单个轴时才返回有效向量, 否则返回零向量
+        /// Convert an Axis value to a Vector3 value.
         /// </summary>
         public static Vector3 ToVector(Axis axis)
         {
@@ -27,8 +26,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将 Transform 的指定方向转换为方向向量
-        /// 仅当 localAxis 是单个轴时才返回有效向量, 否则返回零向量
+        /// Convert an local Axis value to a global Vector3 value.
         /// </summary>
         public static Vector3 ToVector(Axis localAxis, Transform transform)
         {
@@ -46,8 +44,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 返回一个向量最接近的轴向
-        /// 向量必须为非零向量，否则返回 Axis.None
+        /// Convert a Vector3 value to an Axis value.
         /// </summary>
         public static Axis FromVector(Vector3 vector)
         {
@@ -81,8 +78,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 获取一个轴向的反方向
-        /// axis 必须为有向轴, 否则返回原始 Axis
+        /// Get the reversed axis.
         /// </summary>
         public static Axis Reverse(Axis axis)
         {
@@ -100,8 +96,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 判断两个轴向的关系
-        /// a, b 必须为有向轴, 否则结果未定义
+        /// Get the relation between two axes.
         /// </summary>
         public static AxisRelation RelationBetween(Axis a, Axis b)
         {
@@ -120,8 +115,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 判断方向是否为正方向轴
-        /// axis 必须为有向轴, 否则结果未定义
+        /// Is the axis a positive direction?
         /// </summary>
         public static bool IsPositive(Axis axis)
         {

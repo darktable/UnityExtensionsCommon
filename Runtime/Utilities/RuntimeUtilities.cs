@@ -1,18 +1,249 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
 namespace UnityExtensions
 {
     /// <summary>
-    /// 运行时工具箱
+    /// RuntimeUtilities
     /// </summary>
     public struct RuntimeUtilities
     {
         static GameObject _globalGameObject;
+        static bool _commonIORegistered;
+        static IEnumerable<Type> _allAssemblyTypes;
 
+        public static Transform globalTransform => _globalGameObject.transform;
+
+        public static event Action fixedUpdate;
+        public static event Action waitForFixedUpdate;
+        public static event Action update;
+        public static event Action lateUpdate;
+        public static event Action waitForEndOfFrame;
+
+        public static event Action fixedUpdateOnce;
+        public static event Action waitForFixedUpdateOnce;
+        public static event Action updateOnce;
+        public static event Action lateUpdateOnce;
+        public static event Action waitForEndOfFrameOnce;
+
+        /// <summary>
+        /// An update callback can be used in edit-mode
+        /// Note: works with unitedDeltaTime
+        /// </summary>
+        public static event Action unitedUpdate;
+
+        /// <summary>
+        /// An update callback (will be executed once) can be used in edit-mode
+        /// </summary>
+        public static event Action unitedUpdateOnce;
+
+        /// <summary>
+        /// Get deltaTime in unitedUpdate
+        /// </summary>
+        public static float unitedDeltaTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    return Editor.EditorUtilities.unscaledDeltaTime * Time.timeScale;
+                else
+#endif
+                    return Time.deltaTime;
+            }
+        }
+
+        /// <summary>
+        /// Get unscaled deltaTime in unitedUpdate
+        /// </summary>
+        public static float unitedUnscaledDeltaTime
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    return Editor.EditorUtilities.unscaledDeltaTime;
+                else
+#endif
+                    return Time.unscaledDeltaTime;
+            }
+        }
+
+        /// <summary>
+        /// allAssemblyTypes
+        /// </summary>
+        public static IEnumerable<Type> allAssemblyTypes
+        {
+            get
+            {
+                if (_allAssemblyTypes == null)
+                {
+                    _allAssemblyTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(
+                        t =>
+                        {
+                            try
+                            {
+                                return t.GetTypes();
+                            }
+                            catch
+                            {
+                                return new Type[0];
+                            }
+                        });
+                }
+                return _allAssemblyTypes;
+            }
+        }
+
+        /// <summary>
+        /// MaterialPropertyBlock pool
+        /// </summary>
+        public static readonly ObjectPool<MaterialPropertyBlock> materialPropertyBlockPool = new ObjectPool<MaterialPropertyBlock>();
+
+        public static float GetUnitedDeltaTime(TimeMode mode)
+        {
+            return mode == TimeMode.Normal ? unitedDeltaTime : unitedUnscaledDeltaTime;
+        }
+
+        public static void AddUpdate(UpdateMode mode, Action action)
+        {
+            switch (mode)
+            {
+                case UpdateMode.FixedUpdate: fixedUpdate += action; return;
+                case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate += action; return;
+                case UpdateMode.Update: update += action; return;
+                case UpdateMode.LateUpdate: lateUpdate += action; return;
+                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame += action; return;
+            }
+        }
+
+        public static void RemoveUpdate(UpdateMode mode, Action action)
+        {
+            switch (mode)
+            {
+                case UpdateMode.FixedUpdate: fixedUpdate -= action; return;
+                case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate -= action; return;
+                case UpdateMode.Update: update -= action; return;
+                case UpdateMode.LateUpdate: lateUpdate -= action; return;
+                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame -= action; return;
+            }
+        }
+
+        public static T AddGlobalComponent<T>() where T : Component
+        {
+            return _globalGameObject.AddComponent<T>();
+        }
+
+        public static void Swap<T>(ref T a, ref T b)
+        {
+            T c = a;
+            a = b;
+            b = c;
+        }
+
+        public static bool IsNullOrEmpty<T>(T collection) where T : ICollection
+        {
+            return collection == null || collection.Count == 0;
+        }
+
+        /// <summary>
+        /// Set time scale and FixedUpdate frequency at sametime.
+        /// </summary>
+        public static void SetTimeScaleAndFixedUpdateFrequency(float timeScale, float fixedFrequency)
+        {
+            Time.timeScale = timeScale;
+            Time.fixedDeltaTime = timeScale / fixedFrequency;
+        }
+
+        /// <summary>
+        /// Destroy Unity Object in a safe way
+        /// </summary>
+        public static void Destroy(UObject obj)
+        {
+            if (obj != null)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                    UObject.DestroyImmediate(obj);
+                else
+#endif
+                    UObject.Destroy(obj);
+            }
+        }
+
+        /// <summary>
+        /// Support binary reading/writing for Vector2, Vector3, Vector4, byte[]
+        /// </summary>
+        public static void RegisterCommonIOMethods()
+        {
+            if (_commonIORegistered) return;
+            _commonIORegistered = true;
+
+            IOExtensions.Register((BinaryWriter writer, Vector2 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+            });
+
+            IOExtensions.Register((BinaryReader reader) =>
+            {
+                Vector2 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                return value;
+            });
+
+            IOExtensions.Register((BinaryWriter writer, Vector3 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+                writer.Write(value.z);
+            });
+
+            IOExtensions.Register((BinaryReader reader) =>
+            {
+                Vector3 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                value.z = reader.ReadSingle();
+                return value;
+            });
+
+            IOExtensions.Register((BinaryWriter writer, Vector4 value) =>
+            {
+                writer.Write(value.x);
+                writer.Write(value.y);
+                writer.Write(value.z);
+                writer.Write(value.w);
+            });
+
+            IOExtensions.Register((BinaryReader reader) =>
+            {
+                Vector4 value;
+                value.x = reader.ReadSingle();
+                value.y = reader.ReadSingle();
+                value.z = reader.ReadSingle();
+                value.w = reader.ReadSingle();
+                return value;
+            });
+
+            IOExtensions.Register((BinaryWriter writer, byte[] value) =>
+            {
+                writer.Write(value.Length);
+                writer.Write(value);
+            });
+
+            IOExtensions.Register((BinaryReader reader) =>
+            {
+                int length = reader.ReadInt32();
+                return reader.ReadBytes(length);
+            });
+        }
 
         [RuntimeInitializeOnLoadMethod]
         static void Initialize()
@@ -23,7 +254,6 @@ namespace UnityExtensions
             _globalGameObject.transform.ResetLocal();
             UObject.DontDestroyOnLoad(_globalGameObject);
         }
-
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
@@ -45,142 +275,6 @@ namespace UnityExtensions
             };
         }
 #endif
-
-
-        public static Transform globalTransform => _globalGameObject.transform;
-
-
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action fixedUpdate;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action waitForFixedUpdate;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action update;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action lateUpdate;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action waitForEndOfFrame;
-
-
-        /// <summary>
-        /// 一个通用的 Update，编辑器和运行时都会触发
-        /// 注意：应该同时搭配使用 unitedDeltaTime
-        /// </summary>
-        public static event Action unitedUpdate;
-
-
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action fixedUpdateOnce;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action waitForFixedUpdateOnce;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action updateOnce;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action lateUpdateOnce;
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static event Action waitForEndOfFrameOnce;
-
-
-        /// <summary>
-        /// 一个通用的 Update，编辑器和运行时都会触发
-        /// </summary>
-        public static event Action unitedUpdateOnce;
-
-
-        public static float unitedDeltaTime
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    return Editor.EditorUtilities.unscaledDeltaTime * Time.timeScale;
-                else
-#endif
-                    return Time.deltaTime;
-            }
-        }
-
-
-        public static float unitedUnscaledDeltaTime
-        {
-            get
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    return Editor.EditorUtilities.unscaledDeltaTime;
-                else
-#endif
-                    return Time.unscaledDeltaTime;
-            }
-        }
-
-
-        public static float GetUnitedDeltaTime(TimeMode mode)
-        {
-            return mode == TimeMode.Normal ? unitedDeltaTime : unitedUnscaledDeltaTime;
-        }
-
-
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static void AddUpdate(UpdateMode mode, Action action)
-        {
-            switch (mode)
-            {
-                case UpdateMode.FixedUpdate: fixedUpdate += action; return;
-                case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate += action; return;
-                case UpdateMode.Update: update += action; return;
-                case UpdateMode.LateUpdate: lateUpdate += action; return;
-                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame += action; return;
-            }
-        }
-
-
-        /// <summary>
-        /// 仅用于运行时
-        /// </summary>
-        public static void RemoveUpdate(UpdateMode mode, Action action)
-        {
-            switch (mode)
-            {
-                case UpdateMode.FixedUpdate: fixedUpdate -= action; return;
-                case UpdateMode.WaitForFixedUpdate: waitForFixedUpdate -= action; return;
-                case UpdateMode.Update: update -= action; return;
-                case UpdateMode.LateUpdate: lateUpdate -= action; return;
-                case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame -= action; return;
-            }
-        }
-
-
-        /// <summary>
-        /// 添加全局组件
-        /// </summary>
-        public static T AddGlobalComponent<T>() where T : Component
-        {
-            return _globalGameObject.AddComponent<T>();
-        }
-
 
         public class GlobalComponent : ScriptableComponent
         {
@@ -269,132 +363,6 @@ namespace UnityExtensions
             }
 
         } // class GlobalComponent
-
-
-        /// <summary>
-        /// Support binary reading/writing for Vector2, Vector3, Vector4, byte[]
-        /// </summary>
-        public static void RegisterCommonIOMethods()
-        {
-            if (_commonBinaryReadWriteRegistered) return;
-            _commonBinaryReadWriteRegistered = true;
-
-            IOExtensions.Register((BinaryWriter writer, Vector2 value) =>
-            {
-                writer.Write(value.x);
-                writer.Write(value.y);
-            });
-
-            IOExtensions.Register((BinaryReader reader) =>
-            {
-                Vector2 value;
-                value.x = reader.ReadSingle();
-                value.y = reader.ReadSingle();
-                return value;
-            });
-
-            IOExtensions.Register((BinaryWriter writer, Vector3 value) =>
-            {
-                writer.Write(value.x);
-                writer.Write(value.y);
-                writer.Write(value.z);
-            });
-
-            IOExtensions.Register((BinaryReader reader) =>
-            {
-                Vector3 value;
-                value.x = reader.ReadSingle();
-                value.y = reader.ReadSingle();
-                value.z = reader.ReadSingle();
-                return value;
-            });
-
-            IOExtensions.Register((BinaryWriter writer, Vector4 value) =>
-            {
-                writer.Write(value.x);
-                writer.Write(value.y);
-                writer.Write(value.z);
-                writer.Write(value.w);
-            });
-
-            IOExtensions.Register((BinaryReader reader) =>
-            {
-                Vector4 value;
-                value.x = reader.ReadSingle();
-                value.y = reader.ReadSingle();
-                value.z = reader.ReadSingle();
-                value.w = reader.ReadSingle();
-                return value;
-            });
-
-            IOExtensions.Register((BinaryWriter writer, byte[] value) =>
-            {
-                writer.Write(value.Length);
-                writer.Write(value);
-            });
-
-            IOExtensions.Register((BinaryReader reader) =>
-            {
-                int length = reader.ReadInt32();
-                return reader.ReadBytes(length);
-            });
-        }
-        static bool _commonBinaryReadWriteRegistered;
-
-
-        /// <summary>
-        /// 循环利用的 MaterialPropertyBlock 池
-        /// </summary>
-        public static readonly ObjectPool<MaterialPropertyBlock> materialPropertyBlockPool = new ObjectPool<MaterialPropertyBlock>();
-
-
-        /// <summary>
-        /// 交换两个变量的值
-        /// </summary>
-        public static void Swap<T>(ref T a, ref T b)
-        {
-            T c = a;
-            a = b;
-            b = c;
-        }
-
-
-        /// <summary>
-        /// 判断集合是否为 null 或元素个数是否为 0
-        /// </summary>
-        public static bool IsNullOrEmpty<T>(T collection) where T : ICollection
-        {
-            return collection == null || collection.Count == 0;
-        }
-
-
-        /// <summary>
-        /// 同时设置 Unity 时间缩放和 FixedUpdate 频率
-        /// </summary>
-        /// <param name="timeScale"> 要设置的时间缩放 </param>
-        /// <param name="fixedFrequency"> 要设置的 FixedUpdate 频率 </param>
-        public static void SetTimeScaleAndFixedFrequency(float timeScale, float fixedFrequency)
-        {
-            Time.timeScale = timeScale;
-            Time.fixedDeltaTime = timeScale / fixedFrequency;
-        }
-
-
-        /// <summary>
-        /// 使用恰当的方式 Destroy Object
-        /// </summary>
-        public static void DestroySafely(UObject obj)
-        {
-            if (obj != null)
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    UObject.DestroyImmediate(obj);
-                else
-#endif
-                    UObject.Destroy(obj);
-            }
-        }
 
     } // struct RuntimeUtilities
 

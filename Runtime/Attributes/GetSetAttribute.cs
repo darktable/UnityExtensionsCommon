@@ -42,7 +42,7 @@ namespace UnityExtensions
                 if (attribute._target == null)
                 {
                     attribute._target = property.serializedObject.targetObject;
-                    attribute._propertyInfo = ReflectionUtilities.GetPropertyInfo(attribute._target, attribute._propertyName);
+                    attribute._propertyInfo = attribute._target.GetType().GetInstanceProperty(attribute._propertyName);
                 }
 
                 if (attribute._propertyInfo == null)

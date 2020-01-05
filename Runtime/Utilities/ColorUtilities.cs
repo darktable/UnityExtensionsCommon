@@ -3,16 +3,14 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// Color 工具箱
+    /// ColorUtilities
     /// </summary>
     public struct ColorUtilities
     {
         /// <summary>
-        /// 计算颜色的感观亮度
-        /// 参考: http://alienryderflex.com/hsp.html
+        /// Get the perceived brightness of a LDR color (alpha is ignored).
+        /// (http://alienryderflex.com/hsp.html)
         /// </summary>
-        /// <param name="color"> 要计算感观亮度的颜色, alpha 通道被忽略 </param>
-        /// <returns> 颜色的感观亮度, [0..1] </returns>
         public static float GetPerceivedBrightness(Color color)
         {
             return Mathf.Sqrt(
@@ -23,7 +21,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将颜色转化为 ARGB32 格式的颜色代码
+        /// Convert a LDR color value to an ARGB32 format uint value.
         /// </summary>
         public static uint ToARGB32(Color c)
         {
@@ -35,7 +33,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将 ARGB32 格式的颜色代码转化为 Color
+        /// Convert an ARGB32 format uint value to a color value.
         /// </summary>
         public static Color FromARGB32(uint argb)
         {
@@ -49,7 +47,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// Hue 转换为颜色. 不同 hue 对应的颜色为:
+        /// Convert a hue value to a color vlue.
         /// 0-red; 0.167-yellow; 0.333-green; 0.5-cyan; 0.667-blue; 0.833-magenta; 1-red
         /// </summary>
         public static Color HueToColor(float hue)

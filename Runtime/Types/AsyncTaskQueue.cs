@@ -14,7 +14,7 @@ namespace UnityExtensions
         /// </summary>
         /// <param name="current">The task processing currently, -1 means all tasks are done.</param>
         /// <returns>True means this task can be added to the queue. </returns>
-        bool BeforeEnqueue(QuickLinkedList<TTask> tasks, int current);
+        bool BeforeEnqueue(LinkedList<TTask> tasks, int current);
 
         /// <summary>
         /// Process this task. Note this is called asynchronously.
@@ -29,7 +29,7 @@ namespace UnityExtensions
 
     public abstract class QueuedTask<TTask> : IQueuedTask<TTask> where TTask : QueuedTask<TTask>
     {
-        public virtual bool BeforeEnqueue(QuickLinkedList<TTask> tasks, int current) => true;
+        public virtual bool BeforeEnqueue(LinkedList<TTask> tasks, int current) => true;
 
         public virtual void Process() { }
 
@@ -43,7 +43,7 @@ namespace UnityExtensions
     {
         volatile bool _working;
 
-        QuickLinkedList<TTask> _tasks;
+        LinkedList<TTask> _tasks;
         volatile int _current = -1; // -1 means all tasks are done
 
         AutoResetEvent _event;
@@ -69,7 +69,7 @@ namespace UnityExtensions
             {
                 _working = true;
 
-                _tasks = new QuickLinkedList<TTask>();
+                _tasks = new LinkedList<TTask>();
                 _current = -1;
 
                 _event = new AutoResetEvent(false);

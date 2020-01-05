@@ -41,14 +41,14 @@ namespace UnityExtensions
             {
                 if (attribute._fieldOrProp == null)
                 {
-                    var field = ReflectionUtilities.GetFieldInfo(property.serializedObject.targetObject, attribute._name);
+                    var field = property.serializedObject.targetObject.GetType().GetInstanceField(attribute._name);
                     if (field?.FieldType == typeof(bool))
                     {
                         attribute._fieldOrProp = field;
                     }
                     else
                     {
-                        var prop = ReflectionUtilities.GetPropertyInfo(property.serializedObject.targetObject, attribute._name);
+                        var prop = property.serializedObject.targetObject.GetType().GetInstanceProperty(attribute._name);
                         if (prop?.PropertyType == typeof(bool) && prop.CanRead)
                         {
                             attribute._fieldOrProp = prop;

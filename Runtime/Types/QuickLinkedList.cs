@@ -4,15 +4,12 @@ using System.Collections.Generic;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 快速链表. 使用情景：
-    ///     添加或删除元素需要 O(1) 的时间复杂度；
-    ///     添加或删除元素不希望造成堆对象的创建和回收；
-    ///     在遍历时需要添加或删除元素（不能使用 foreach）。
+    /// Quick linked list, no extra node reference.
     /// </summary>
-    public class QuickLinkedList<T>
+    public class LinkedList<T>
     {
         /// <summary>
-        /// 链表节点
+        /// internal node
         /// </summary>
         public struct Node
         {
@@ -32,25 +29,25 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 链表第一个节点的 id
+        /// The id of first node
         /// </summary>
         public int first => _first;
 
 
         /// <summary>
-        /// 链表最后一个节点的 id
+        /// The id of last node
         /// </summary>
         public int last => _last;
 
 
         /// <summary>
-        /// 链表节点总数
+        /// Number of nodes
         /// </summary>
         public int count => _arrayCount - _emptyIds.Count;
 
 
         /// <summary>
-        /// 通过 id 访问节点的值
+        /// Visit node value by id
         /// </summary>
         public T this[int id]
         {
@@ -81,7 +78,7 @@ namespace UnityExtensions
         }
 
 
-        public QuickLinkedList(int capacity = 16)
+        public LinkedList(int capacity = 16)
         {
             _emptyIds = new Stack<int>(4);
             _array = new Node[capacity < 4 ? 4 : capacity];
@@ -165,10 +162,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
-        /// <returns> id </returns>
         public int AddFirst(T value)
         {
             var node = new Node { previous = -1, next = _first, value = value };
@@ -182,10 +175,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
-        /// <returns> id </returns>
         public int AddLast(T value)
         {
             var node = new Node { previous = _last, next = -1, value = value };
@@ -199,10 +188,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
-        /// <returns> id </returns>
         public int AddAfter(int id, T value)
         {
             if (_array[id].isAlone && _first != id)
@@ -223,10 +208,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
-        /// <returns> id </returns>
         public int AddBefore(int id, T value)
         {
             if (_array[id].isAlone && _first != id)
@@ -247,9 +228,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
         public void Clear()
         {
             _emptyIds.Clear();
@@ -260,9 +238,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
         public void Remove(int id)
         {
             if (_array[id].isAlone && _first != id)
@@ -273,9 +248,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
         public void RemoveFirst()
         {
             if (_first == -1)
@@ -286,9 +258,6 @@ namespace UnityExtensions
         }
 
 
-        /// <summary>
-        /// O(1)
-        /// </summary>
         public void RemoveLast()
         {
             if (_last == -1)
@@ -305,7 +274,7 @@ namespace UnityExtensions
             int _first;
             int _current;
 
-            internal Enumerator(QuickLinkedList<T> linkedList)
+            internal Enumerator(LinkedList<T> linkedList)
             {
                 _array = linkedList._array;
                 _first = linkedList._first;

@@ -3,50 +3,50 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// 随机数（使用 Create 方法创建对象）
+    /// Random (Use Random.Create to create a random object)
     /// </summary>
     [Serializable]
     public struct Random
     {
         /// <summary>
-        /// 种子
+        /// seed
         /// </summary>
         public uint seed;
 
 
-        // 静态 Random 实例, 用以自动分配随机种子
+        // Internal static instance, used for assign seed for created instance
         static Random _static = Create((uint)(DateTime.Now.Ticks & 0x_FFFF_FFFF));
 
 
-        // 更新种子，每次使用前都会在内部调用
+        // Update seed
         void Next()
         {
             //
             // https://en.wikipedia.org/wiki/Lehmer_random_number_generator
             //
-            // 1.在原始实现中，seed 值域为 [1, 2147483646]，为使用方便此处使用取余运算并最后加 1 将 UInt32 的 seed 转化到此范围
-            // 2.将数值转换为 UInt64 是为了防止乘法运算溢出
-            // 3.原始实现中最后取余运算的结果直接存储到了 seed 中（运算结果最小为 1 而不会是 0），为了与步骤 1 兼容最后需要减去 1
+            // 1.In original implementation，the value range of seed is [1, 2147483646], here we use (seed % 2147483646U + 1U) to convert the seed value into that range.
+            // 2.Convert to UInt64 to avoid overflow.
+            // 3.The result need be compatible with step 1, so minus 1 at last.
             //
             seed = (uint)((seed % 2147483646U + 1U) * 48271UL % 2147483647UL) - 1U;
         }
 
 
         /// <summary>
-        /// 返回一个 [0, 1) 范围内的随机浮点数（double）
+        /// Get next random double value in range [0, 1).
         /// <summary>
         public double Next01()
         {
             Next();
             //
-            // seed 此时值域为 [0, 2147483645]
+            // Value range of seed is [0, 2147483645] now
             //
             return seed / 2147483646.0;
         }
 
 
         /// <summary>
-        /// 创建一个随机对象，使用指定的种子初始化此对象
+        /// Use a specified seed to create a Random instance.
         /// </summary>
         public static Random Create(uint seed)
         {
@@ -55,8 +55,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 创建一个随机对象，使用自动分配的随机种子初始化
-        /// 自动分配的随机种子与时间无关，因此连续调用不会产生相同的结果
+        /// Use a random seed to create a Random instance.
+        /// The seeds are different even if create many instances in a very short time.
         /// </summary>
         public static Random Create()
         {
@@ -66,7 +66,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 返回一个 [0, 1) 范围内的随机浮点数
+        /// Get next random float value in range [0, 1).
         /// </summary>
         public float Range01()
         {
@@ -75,11 +75,10 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 返回一个指定范围内的随机浮点数
+        /// Get next random float value in a specified range.
         /// </summary>
-        /// <param name="minValue"> 返回的随机数的下界(包含) </param>
-        /// <param name="maxValue"> 返回的随机数的上界(不包含) </param>
-        /// <returns> [minValue, maxValue) 范围的均匀分布随机数 </returns>
+        /// <param name="minValue"> The minimum value (included) </param>
+        /// <param name="maxValue"> The maximum value (excluded) </param>
         public float Range(float minValue, float maxValue)
         {
             return minValue + (maxValue - minValue) * (float)Next01();
@@ -87,11 +86,10 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 返回一个指定范围内的随机整数
+        /// Get next random int value in a specified range.
         /// </summary>
-        /// <param name="minValue"> 返回的随机数的下界(包含) </param>
-        /// <param name="maxValue"> 返回的随机数的上界(不包含) </param>
-        /// <returns> [minValue, maxValue) 范围的均匀分布随机数 </returns>
+        /// <param name="minValue"> The minimum value (included) </param>
+        /// <param name="maxValue"> The maximum value (excluded) </param>
         public int Range(int minValue, int maxValue)
         {
             return minValue + (int)((maxValue - minValue) * Next01());
@@ -99,10 +97,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 测试随机事件在一次独立实验中是否发生
+        /// Test a random event with specified probability whether it occurs or not.
         /// </summary>
-        /// <param name="probability"> [0f, 1f] 范围的概率 </param>
-        /// <returns> 如果事件发生返回 true, 否则返回 false </returns>
+        /// <param name="probability"> [0f, 1f] </param>
         public bool Test(float probability)
         {
             return Next01() < probability;
@@ -110,13 +107,12 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 产生正态分布的随机数
-        /// 正态分布随机数落在 μ±σ, μ±2σ, μ±3σ 的概率依次为 68.26%, 95.44%, 99.74%
+        /// Get next Gaussian Distribution value (The probabilities of this value in range of μ±σ, μ±2σ and μ±3σ are 68.27%, 95.45%, 99.73%).
         /// </summary>
-        /// <param name="averageValue"> 正态分布的平均值, 即 N(μ, σ^2) 中的 μ </param>
-        /// <param name="standardDeviation"> 正态分布的标准差, 即 N(μ, σ^2) 中的 σ </param>
-        /// <returns> 返回正态分布的随机数. 理论值域是 μ±∞ </returns>
-        public float Normal(float averageValue, float standardDeviation)
+        /// <param name="averageValue"> The average value of the distribution (μ in N(μ, σ^2)). </param>
+        /// <param name="standardDeviation"> The standard deviation of the distribution (σ in N(μ, σ^2)). </param>
+        /// <returns> The range of result is μ±∞ in theory. </returns>
+        public float Gaussian(float averageValue, float standardDeviation)
         {
             //
             // https://en.wikipedia.org/wiki/Box-Muller_transform

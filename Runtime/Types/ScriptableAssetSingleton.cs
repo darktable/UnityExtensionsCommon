@@ -8,9 +8,7 @@ using UnityExtensions.Editor;
 namespace UnityExtensions
 {
     /// <summary>
-    /// ScriptableAssetSingleton
-    /// 在编辑器和运行时提供访问资源单例的方法
-    /// 注意：创建的资源需要加入项目的 Preloaded Assets 列表
+    /// ScriptableAssetSingleton, the created asset can be added to 'Preloaded Assets' list in player settings automatically.
     /// </summary>
     public class ScriptableAssetSingleton<T> : ScriptableAsset where T : ScriptableAssetSingleton<T>
     {
@@ -18,7 +16,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 访问单例
+        /// The asset instance.
         /// </summary>
         public static T instance
         {
@@ -31,11 +29,11 @@ namespace UnityExtensions
                     if (!_instance)
                     {
                         _instance = CreateInstance<T>();
-                        Debug.LogWarning(string.Format("No asset of {0} loaded, a temporary instance was created. Use {0}.CreateOrSelectAsset to create an asset.", typeof(T).Name));
+                        Debug.LogWarning(string.Format("No asset of type {0} loaded, a temporary instance was created. Use {0}.CreateOrSelectAsset to create an asset.", typeof(T).Name));
                     }
 #else
                     _instance = CreateInstance<T>();
-                    Debug.LogWarning(string.Format("No asset of {0} loaded, a temporary instance was created. Do you forget to add the asset to \"Preloaded Assets\" list?", typeof(T).Name));
+                    Debug.LogWarning(string.Format("No asset of type {0} loaded, a temporary instance was created. Do you forget to add the asset to \"Preloaded Assets\" list?", typeof(T).Name));
 #endif
                 }
                 return _instance;
@@ -52,9 +50,10 @@ namespace UnityExtensions
 #if UNITY_EDITOR
 
         /// <summary>
-        /// 创建单例资源, 如果已经存在则选中该资源
+        /// Create asset if it does not exist, or just select it if it exist.
+        /// The created asset can be added to 'Preloaded Assets' list in player settings automatically.
         /// </summary>
-        public static void CreateOrSelectAsset()
+        public static void CreateOrSelectAsset(bool addToPreloadedAssets = true)
         {
             bool needCreate = false;
 
@@ -69,10 +68,9 @@ namespace UnityExtensions
             }
             else needCreate = !AssetDatabase.IsNativeAsset(_instance);
 
-            if (needCreate)
-            {
-                AssetUtilities.CreateAsset(_instance);
-            }
+            if (needCreate) AssetUtilities.CreateAsset(_instance);
+
+            if (addToPreloadedAssets) AssetUtilities.AddPreloadedAsset(_instance);
 
             Selection.activeObject = instance;
         }

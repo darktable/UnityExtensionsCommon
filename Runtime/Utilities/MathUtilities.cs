@@ -4,43 +4,15 @@ using UnityEngine;
 namespace UnityExtensions
 {
     /// <summary>
-    /// 数学工具箱
+    /// MathUtilities
     /// </summary>
     public struct MathUtilities
     {
-        /// <summary>
-        /// 2 的平方根
-        /// </summary>
-        public const float Sqrt2 = 1.4142136f;
-
-
-        /// <summary>
-        /// 3 的平方根
-        /// </summary>
-        public const float Sqrt3 = 1.7320508f;
-
-
-        /// <summary>
-        /// Pi x 2
-        /// </summary>
-        public const float TwoPi = 6.2831853f;
-
-
-        /// <summary>
-        /// Pi / 2
-        /// </summary>
-        public const float HalfPi = 1.5707963f;
-
-
-        /// <summary>
-        /// 百万分之一
-        /// </summary>
+        public const float Sqrt2 = 1.41421356f;
+        public const float Sqrt3 = 1.73205081f;
+        public const float TwoPi = 6.28318531f;
+        public const float HalfPi = 1.57079633f;
         public const float OneMillionth = 1e-6f;
-
-
-        /// <summary>
-        /// 一百万
-        /// </summary>
         public const float Million = 1e6f;
 
 
@@ -130,17 +102,17 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算 2 的指数
+        /// 2^n
         /// </summary>
-        public static double Exp2(double x)
+        public static double Exp2(double n)
         {
-            return Math.Exp(x * 0.69314718055994530941723212145818);
+            return Math.Exp(n * 0.69314718055994530941723212145818);
         }
 
 
         /// <summary>
-        /// 保留指定的有效位数, 对剩余部分四舍五入.
-        /// 一般而言 double 的有效位数有 15-17 位.
+        /// Keeps the specified significant digits and rounds off the rest.
+        /// (a double has 15-17 significant digits)
         /// </summary>
         public static double RoundToSignificantDigits(double value, int digits)
         {
@@ -157,8 +129,8 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 保留指定的有效位数, 对剩余部分四舍五入.
-        /// 一般而言 float 的有效位数有 6-9 位.
+        /// Keeps the specified significant digits and rounds off the rest.
+        /// (a float has 6-9 significant digits)
         /// </summary>
         public static float RoundToSignificantDigitsFloat(float value, int digits)
         {
@@ -167,62 +139,38 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将参数单位化
+        /// Linear map to 0-1
         /// </summary>
-        /// <returns> 正值返回 1, 负值返回 -1, 0 返回 0 </returns>
-        public static float Normalize(float value)
-        {
-            if (value > 0f) return 1f;
-            if (value < 0f) return -1f;
-            return 0f;
-        }
-
-
-        /// <summary>
-        /// 线性映射到 01
-        /// </summary>
-        public static float Map01(float value, float min, float max)
+        public static float Linear01(float value, float min, float max)
         {
             return (value - min) / (max - min);
         }
 
 
         /// <summary>
-        /// 线性映射到 01
+        /// Linear map to 0-1 (Clamped)
         /// </summary>
-        public static float Map01Clamped(float value, float min, float max)
+        public static float Linear01Clamped(float value, float min, float max)
         {
             return Mathf.Clamp01((value - min) / (max - min));
         }
 
 
         /// <summary>
-        /// 线性映射
+        /// Linear map to outputMin-outputMax
         /// </summary>
-        public static float Map(float value, float min, float max, float outputMin, float outputMax)
+        public static float Linear(float value, float min, float max, float outputMin, float outputMax)
         {
             return (value - min) / (max - min) * (outputMax - outputMin) + outputMin;
         }
 
 
         /// <summary>
-        /// 线性映射
+        /// Linear map to outputMin-outputMax (Clamped)
         /// </summary>
-        public static float MapClamped(float value, float min, float max, float outputMin, float outputMax)
+        public static float LinearClamped(float value, float min, float max, float outputMin, float outputMax)
         {
             return Mathf.Clamp01((value - min) / (max - min)) * (outputMax - outputMin) + outputMin;
-        }
-
-
-        /// <summary>
-        /// 反转插值
-        /// </summary>
-        /// <param name="t"> 单位化的时间, 即取值范围为 [0, 1] </param>
-        /// <param name="interpolate"> 一个在 [0, 1] 上的插值方法 </param>
-        /// <returns> 与给定插值方法关于 (0.5, 0.5) 中心对称的插值方法的插值结果 </returns>
-        public static float InverseInterpolate(float t, Func<float, float> interpolate)
-        {
-            return 1f - interpolate(1f - t);
         }
 
 
@@ -235,57 +183,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 一维 Cardinal Spline
+        /// Cross two Vector2
         /// </summary>
-        public static float CardinalSpline(
-            float t,
-            float p0, float p1, float p2, float p3,
-            float tension = 0.5f)
-        {
-            float a = tension * (p2 - p0);
-            float b = p2 - p1;
-            float c = tension * (p3 - p1) + a - b - b;
-
-            return p1 + t * a - t * t * (a + c - b) + t * t * t * c;
-        }
-
-
-        /// <summary>
-        /// 二维 Cardinal Spline
-        /// </summary>
-        public static Vector2 CardinalSpline(
-            float t,
-            Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3,
-            float tension = 0.5f)
-        {
-            Vector2 a = tension * (p2 - p0);
-            Vector2 b = p2 - p1;
-            Vector2 c = tension * (p3 - p1) + a - b - b;
-
-            return p1 + t * a - t * t * (a + c - b) + t * t * t * c;
-        }
-
-
-        /// <summary>
-        /// 三维 Cardinal Spline
-        /// </summary>
-        public static Vector3 CardinalSpline(
-            float t,
-            Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3,
-            float tension = 0.5f)
-        {
-            Vector3 a = tension * (p2 - p0);
-            Vector3 b = p2 - p1;
-            Vector3 c = tension * (p3 - p1) + a - b - b;
-
-            return p1 + t * a - t * t * (a + c - b) + t * t * t * c;
-        }
-
-
-        /// <summary>
-        /// Vector2 的叉乘运算
-        /// </summary>
-        /// <returns> 叉乘的结果应当是一个 Vector3，其中 x 和 y 都是 0，返回的是 z </returns>
+        /// <returns> The z value of the result Vector3 (x, y are zero) </returns>
         public static float Cross(Vector2 lhs, Vector2 rhs)
         {
             return lhs.x * rhs.y - lhs.y * rhs.x;
@@ -293,7 +193,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算点在平面上的投影位置
+        /// Project a point onto a plane.
         /// </summary>
         public static Vector3 ProjectOnPlane(Vector3 point, Vector3 planePoint, Vector3 planeNormal)
         {
@@ -304,14 +204,9 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 射线检测平面
+        /// Get the point of intersection of a ray and  a plane
         /// </summary>
-        /// <param name="rayOrigin"> 射线起点 </param>
-        /// <param name="rayDirection"> 射线方向 </param>
-        /// <param name="planePoint"> 面内一点 </param>
-        /// <param name="planeNormal"> 面法线 </param>
-        /// <returns> 返回 0 表示不相交, -1 表示与背面相交，1 表示与正面相交 </returns>
-        /// <param name="result"> 交点 </param>
+        /// <returns> 0 means non result, -1 means the result on the inversed direction of ray，1 means normal result </returns>
         public static int RayIntersectPlane(Vector3 rayOrigin, Vector3 rayDirection, Vector3 planePoint, Vector3 planeNormal, out Vector3 result)
         {
             float cos = Vector3.Dot(planeNormal, rayDirection);
@@ -340,19 +235,19 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算射线上距离指定点最近的点, 返回值是 origin + direction * t 中的 t
+        /// Get the closest point to the specified point on a ray. Returned value is 't' in "origin + direction * t".
         /// </summary>
         public static float ClosestPointOnRayFactor(Vector3 point, Vector3 origin, Vector3 direction)
         {
             float t = direction.sqrMagnitude;
-            if (t < OneMillionth) return 0f;
+            if (t == 0f) return 0f;
 
             return Mathf.Max(Vector3.Dot(point - origin, direction) / t, 0f);
         }
 
 
         /// <summary>
-        /// 计算射线上距离指定点最近的点
+        /// Get the closest point to the specified point on a ray.
         /// </summary>
         public static Vector3 ClosestPointOnRay(Vector3 point, Vector3 origin, Vector3 direction)
         {
@@ -361,21 +256,21 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算线段上距离指定点最近的点,  返回值是 start + (end - start) * t 中的 t
+        /// Get the closest point to the specified point on a segment. Returned value is 't' in "start + (end - start) * t".
         /// </summary>
         public static float ClosestPointOnSegmentFactor(Vector2 point, Vector2 start, Vector2 end)
         {
             Vector2 direction = end - start;
 
             float t = direction.sqrMagnitude;
-            if (t < OneMillionth) return 0f;
+            if (t == 0f) return 0f;
 
             return Mathf.Clamp01(Vector2.Dot(point - start, direction) / t);
         }
 
 
         /// <summary>
-        /// 计算线段上距离指定点最近的点
+        /// Get the closest point to the specified point on a segment.
         /// </summary>
         public static Vector2 ClosestPointOnSegment(Vector2 point, Vector2 start, Vector2 end)
         {
@@ -384,21 +279,21 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算线段上距离指定点最近的点,  返回值是 start + (end - start) * t 中的 t
+        /// Get the closest point to the specified point on a segment. Returned value is 't' in "start + (end - start) * t".
         /// </summary>
         public static float ClosestPointOnSegmentFactor(Vector3 point, Vector3 start, Vector3 end)
         {
             Vector3 direction = end - start;
 
             float t = direction.sqrMagnitude;
-            if (t < OneMillionth) return 0f;
+            if (t == 0f) return 0f;
 
             return Mathf.Clamp01(Vector3.Dot(point - start, direction) / t);
         }
 
 
         /// <summary>
-        /// 计算线段上距离指定点最近的点
+        /// Get the closest point to the specified point on a segment.
         /// </summary>
         public static Vector3 ClosestPointOnSegment(Vector3 point, Vector3 start, Vector3 end)
         {
@@ -408,7 +303,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算圆内距离指定点最近的点
+        /// Get the closest point inside a circle.
         /// </summary>
         public static Vector3 ClosestPointInCircle(Vector3 point, Vector3 center, Vector3 normal, float radius)
         {
@@ -424,7 +319,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算球内距离指定点最近的点
+        /// Get the closest point inside a sphere.
         /// </summary>
         public static Vector3 ClosestPointInSphere(Vector3 point, Vector3 center, float radius)
         {
@@ -439,19 +334,19 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 计算轴对齐的长方体内距离指定点最近的点
+        /// Get the closest point inside a axis aligned bounds.
         /// </summary>
-        public static Vector3 ClosestPointInCuboid(Vector3 point, Vector3 cuboidMin, Vector3 cuboidMax)
+        public static Vector3 ClosestPointInBounds(Vector3 point, Vector3 boundsMin, Vector3 boundsMax)
         {
-            point.x = Mathf.Clamp(point.x, cuboidMin.x, cuboidMax.x);
-            point.y = Mathf.Clamp(point.y, cuboidMin.y, cuboidMax.y);
-            point.z = Mathf.Clamp(point.z, cuboidMin.z, cuboidMax.z);
+            point.x = Mathf.Clamp(point.x, boundsMin.x, boundsMax.x);
+            point.y = Mathf.Clamp(point.y, boundsMin.y, boundsMax.y);
+            point.z = Mathf.Clamp(point.z, boundsMin.z, boundsMax.z);
             return point;
         }
 
 
         /// <summary>
-        /// 计算向量与扇形的夹角
+        /// Get angle between a vector and a sector.
         /// </summary>
         public static float AngleBetweenVectorAndSector(Vector3 vector, Vector3 sectorNormal, Vector3 sectorDirection, float sectorAngle)
         {
@@ -466,7 +361,7 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 获得两条线段上最近的两点
+        /// Get the closest points on two segments.
         /// </summary>
         public static void ClosestPointBetweenSegments(
             Vector3 startA, Vector3 endA,
@@ -585,26 +480,14 @@ namespace UnityExtensions
 
 
         /// <summary>
-        /// 将 [0, 1] 范围的指数映射到 [OneMillionth, Million], 0.5 对应 1
-        /// 设计用于传递给 shader 中的 pow
+        /// Create ordered dithering matrix.
         /// </summary>
-        public static float BalancePowExponent(float exp01)
-        {
-            if (exp01 > 1f - OneMillionth * 0.5f) return Million;
-            if (exp01 < OneMillionth * 0.5f) return OneMillionth;
-            return (exp01 > 0.5f) ? (1.0f / (2.0f - exp01 - exp01)) : (exp01 + exp01);
-        }
-
-
-        /// <summary>
-        /// 创建 Ordered Dithering 矩阵
-        /// </summary>
-        /// <param name="size"> 必须为 2 的整数次幂，至少为 2 </param>
+        /// <param name="size"> Must be power of 2 (at least 2). </param>
         public static int[,] CreateOrderedDitheringMatrix(int size)
         {
             if (size <= 1 || !Mathf.IsPowerOfTwo(size))
             {
-                Debug.LogError("Size of ordered dithering matrix must be larger than 1 and be power of 2. this: " + size);
+                Debug.LogError("Size of ordered dithering matrix must be larger than 1 and be power of 2.");
                 return null;
             }
 
@@ -636,40 +519,6 @@ namespace UnityExtensions
                     input = output;
                 }
             }
-        }
-
-
-        /// <summary>
-        /// 从矩阵中获取位置
-        /// </summary>
-        public static Vector3 GetMatrixPosition(ref Matrix4x4 matrix)
-        {
-            return new Vector3(matrix.m03, matrix.m13, matrix.m23);
-        }
-
-
-        /// <summary>
-        /// 从矩阵中获取旋转
-        /// </summary>
-        public static Quaternion GetMatrixRotation(ref Matrix4x4 matrix)
-        {
-            return Quaternion.LookRotation(
-                new Vector3(matrix.m02, matrix.m12, matrix.m22),
-                new Vector3(matrix.m01, matrix.m11, matrix.m21)
-                );
-        }
-
-
-        /// <summary>
-        /// 从矩阵中获取缩放
-        /// </summary>
-        public static Vector3 GetMatrixScale(ref Matrix4x4 matrix)
-        {
-            return new Vector3(
-                new Vector4(matrix.m00, matrix.m10, matrix.m20, matrix.m30).magnitude,
-                new Vector4(matrix.m01, matrix.m11, matrix.m21, matrix.m31).magnitude,
-                new Vector4(matrix.m02, matrix.m12, matrix.m22, matrix.m32).magnitude
-                );
         }
 
     } // struct MathUtilities
