@@ -15,15 +15,18 @@ namespace UnityExtensions.Editor
                 if (_instance == null)
                 {
                     _instance = new T();
-                    EditorJsonUtility.FromJsonOverwrite(_instance.Load(), _instance);
+                    EditorJsonUtility.FromJsonOverwrite(_instance._json = _instance.Load(), _instance);
                 }
                 return _instance;
             }
         }
 
+        string _json;
+
         internal void Serialize()
         {
-            Save(EditorJsonUtility.ToJson(this, true));
+            var json = EditorJsonUtility.ToJson(this, true);
+            if (json != _json) Save(_json = json);
         }
 
         protected virtual void Save(string data)
