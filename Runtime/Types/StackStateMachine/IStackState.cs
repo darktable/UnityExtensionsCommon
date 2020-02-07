@@ -2,16 +2,6 @@
 namespace UnityExtensions
 {
     /// <summary>
-    /// State stack action.
-    /// </summary>
-    public enum StackAction
-    {
-        Push,
-        Pop,
-    }
-
-
-    /// <summary>
     /// Stack state.
     /// </summary>
     public interface IStackState
@@ -22,14 +12,24 @@ namespace UnityExtensions
         void OnReset();
 
         /// <summary>
-        /// Called when StateMachine enters this state.
+        /// Called when StateMachine pushs this state.
         /// </summary>
-        void OnEnter(StackAction stackAction);
+        void OnPush();
 
         /// <summary>
-        /// Called when StateMachine quits this state.
+        /// Called when StateMachine pops this state.
         /// </summary>
-        void OnExit(StackAction stackAction);
+        void OnPop();
+
+        /// <summary>
+        /// Called when StateMachine pushs other state if this was the current.
+        /// </summary>
+        void OnSuspend();
+
+        /// <summary>
+        /// Called when StateMachine pops other state if this becomes the current.
+        /// </summary>
+        void OnResume();
 
         /// <summary>
         /// Called when StateMachine updates this state.

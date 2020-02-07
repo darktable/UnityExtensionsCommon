@@ -9,8 +9,10 @@ namespace UnityExtensions
     public abstract class BaseStackStateComponent : ScriptableComponent, IStackState
     {
         public virtual void OnReset() { }
-        public virtual void OnEnter(StackAction stackAction) { }
-        public virtual void OnExit(StackAction stackAction) { }
+        public virtual void OnPush() { }
+        public virtual void OnPop() { }
+        public virtual void OnSuspend() { }
+        public virtual void OnResume() { }
         public virtual void OnUpdate(float deltaTime) { }
     }
 
@@ -23,41 +25,75 @@ namespace UnityExtensions
     public class StackStateComponent : BaseStackStateComponent
     {
         [SerializeField]
-        StackStateEvent _onEnter = default;
+        UnityEvent _onPush = default;
 
         [SerializeField]
-        StackStateEvent _onExit = default;
+        UnityEvent _onPop = default;
 
-        public event UnityAction<StackAction> onEnter
+        [SerializeField]
+        UnityEvent _onSuspend = default;
+
+        [SerializeField]
+        UnityEvent _onResume = default;
+
+        public event UnityAction onPush
         {
             add
             {
-                if (_onEnter == null) _onEnter = new StackStateEvent();
-                _onEnter.AddListener(value);
+                if (_onPush == null) _onPush = new UnityEvent();
+                _onPush.AddListener(value);
             }
-            remove { _onEnter?.RemoveListener(value); }
+            remove { _onPush?.RemoveListener(value); }
         }
 
-        public event UnityAction<StackAction> onExit
+        public event UnityAction onPop
         {
             add
             {
-                if (_onExit == null) _onExit = new StackStateEvent();
-                _onExit.AddListener(value);
+                if (_onPop == null) _onPop = new UnityEvent();
+                _onPop.AddListener(value);
             }
-            remove { _onExit?.RemoveListener(value); }
+            remove { _onPop?.RemoveListener(value); }
         }
 
-
-        public override void OnEnter(StackAction stackAction)
+        public event UnityAction onSuspend
         {
-            _onEnter?.Invoke(stackAction);
+            add
+            {
+                if (_onSuspend == null) _onSuspend = new UnityEvent();
+                _onSuspend.AddListener(value);
+            }
+            remove { _onSuspend?.RemoveListener(value); }
         }
 
-
-        public override void OnExit(StackAction stackAction)
+        public event UnityAction onResume
         {
-            _onExit?.Invoke(stackAction);
+            add
+            {
+                if (_onResume == null) _onResume = new UnityEvent();
+                _onResume.AddListener(value);
+            }
+            remove { _onResume?.RemoveListener(value); }
+        }
+
+        public override void OnPush()
+        {
+            _onPush?.Invoke();
+        }
+
+        public override void OnPop()
+        {
+            _onPop?.Invoke();
+        }
+
+        public override void OnSuspend()
+        {
+            _onSuspend?.Invoke();
+        }
+
+        public override void OnResume()
+        {
+            _onResume?.Invoke();
         }
 
     } // class StackStateComponent

@@ -70,12 +70,12 @@ namespace UnityExtensions
             _duringSetting = true;
 #endif
 
-            if (stateCount > 0) currentState?.OnExit(StackAction.Push);
+            if (stateCount > 0) currentState?.OnSuspend();
 
             _currentStateTime = 0;
             _states.Add(newState);
 
-            newState?.OnEnter(StackAction.Push);
+            newState?.OnPush();
 
 #if DEBUG
             _duringSetting = false;
@@ -100,12 +100,12 @@ namespace UnityExtensions
 
             T originalState = currentState;
 
-            originalState?.OnExit(StackAction.Pop);
+            originalState?.OnPop();
 
             _states.RemoveAt(_states.Count - 1);
             _currentStateTime = 0;
 
-            if (stateCount > 0) currentState?.OnEnter(StackAction.Pop);
+            if (stateCount > 0) currentState?.OnResume();
 
 #if DEBUG
             _duringSetting = false;
