@@ -11,10 +11,10 @@ namespace UnityExtensions
         public int count => _objects.Count;
 
 
-        public BaseObjectPool(int preallocateCount = 0)
+        public BaseObjectPool(int initialQuantity = 0)
         {
-            _objects = new Stack<T>(preallocateCount > 16 ? preallocateCount : 16);
-            AddObjects(preallocateCount);
+            _objects = new Stack<T>(initialQuantity > 16 ? initialQuantity : 16);
+            AddObjects(initialQuantity);
         }
 
 
@@ -26,7 +26,6 @@ namespace UnityExtensions
             while (quantity > 0)
             {
                 _objects.Push(CreateInstance());
-
                 quantity--;
             }
         }
@@ -34,8 +33,7 @@ namespace UnityExtensions
 
         public T Spawn()
         {
-            if (_objects.Count > 0) return _objects.Pop();
-            return CreateInstance();
+            return _objects.Count > 0 ? _objects.Pop() : CreateInstance();
         }
 
 
@@ -78,7 +76,7 @@ namespace UnityExtensions
     {
         protected override T CreateInstance() => new T();
 
-        public ObjectPool(int preallocateCount = 0) : base(preallocateCount) { }
+        public ObjectPool(int initialQuantity = 0) : base(initialQuantity) { }
 
     } // class ObjectPool
 
