@@ -180,6 +180,20 @@ namespace UnityExtensions
         /// <summary>
         /// Find a loaded scene
         /// </summary>
+        /// <returns> The loaded scene, return default(Scene) if no matched </returns>
+        public static Scene FindScene(Predicate<Scene> match)
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                if (match(scene)) return scene;
+            }
+            return default;
+        }
+
+        /// <summary>
+        /// Find a loaded scene
+        /// </summary>
         /// <returns> index of loaded scene (use SceneManager.GetSceneAt to get the scene), return -1 if no matched </returns>
         public static int FindSceneIndex(Predicate<Scene> match)
         {
