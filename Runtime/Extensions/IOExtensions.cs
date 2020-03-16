@@ -203,6 +203,69 @@ namespace UnityExtensions
         }
 
         /// <summary>
+        /// Read a specific type data array from the stream.
+        /// Default support numeric types, DateTime and string, you can use Register to register custom types.
+        /// </summary>
+        public static void Read<T>(this BinaryReader reader, ref T[] array)
+        {
+            int count = reader.ReadInt32();
+            if (array == null || array.Length != count) array = new T[count];
+            reader.Read(array, 0, count);
+        }
+
+        /// <summary>
+        /// Read a specific type data list from the stream.
+        /// Default support numeric types, DateTime and string, you can use Register to register custom types.
+        /// </summary>
+        public static void Read<T>(this BinaryReader reader, IList<T> list)
+        {
+            int count = reader.ReadInt32();
+            while (count-- > 0)
+            {
+                list.Add(BinaryIO<T>.read(reader));
+            }
+        }
+
+        /// <summary>
+        /// Write a specific type data list to the stream.
+        /// Default support numeric types, DateTime and string, you can use Register to register custom types.
+        /// </summary>
+        public static void Write<T>(this BinaryWriter writer, IList<T> buffer)
+        {
+            writer.Write(buffer.Count);
+            writer.Write(buffer, 0, buffer.Count);
+        }
+
+        /// <summary>
+        /// Read a specific type data dictionary from the stream.
+        /// Default support numeric types, DateTime and string, you can use Register to register custom types.
+        /// </summary>
+        public static void Read<TKey, TValue>(this BinaryReader reader, IDictionary<TKey, TValue> dictionary)
+        {
+            int count = reader.ReadInt32();
+            while (count-- > 0)
+            {
+                var key = reader.Read<TKey>();
+                var value = reader.Read<TValue>();
+                dictionary.Add(key, value);
+            }
+        }
+
+        /// <summary>
+        /// Write a specific type data dictionary to the stream.
+        /// Default support numeric types, DateTime and string, you can use Register to register custom types.
+        /// </summary>
+        public static void Write<TKey, TValue>(this BinaryWriter writer, IDictionary<TKey, TValue> dictionary)
+        {
+            writer.Write(dictionary.Count);
+            foreach (var pair in dictionary)
+            {
+                writer.Write<TKey>(pair.Key);
+                writer.Write<TValue>(pair.Value);
+            }
+        }
+
+        /// <summary>
         /// Write a specific type data list to the stream.
         /// Default support numeric types, DateTime and string, you can use Register to register custom types.
         /// Note: DateTime is always converted to Local time when writing.
