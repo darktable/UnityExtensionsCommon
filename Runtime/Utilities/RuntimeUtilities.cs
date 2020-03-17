@@ -15,7 +15,6 @@ namespace UnityExtensions
     public struct RuntimeUtilities
     {
         static GameObject _globalGameObject;
-        static bool _commonIORegistered;
         static IEnumerable<Type> _allAssemblyTypes;
 
         public static Transform globalTransform => _globalGameObject.transform;
@@ -105,6 +104,11 @@ namespace UnityExtensions
         /// MaterialPropertyBlock pool
         /// </summary>
         public static readonly ObjectPool<MaterialPropertyBlock> materialPropertyBlockPool = new ObjectPool<MaterialPropertyBlock>();
+
+        /// <summary>
+        /// FixedUpdate times
+        /// </summary>
+        public static int fixedFrameCount { get; private set; }
 
         public static float GetUnitedDeltaTime(TimeMode mode)
         {
@@ -210,9 +214,6 @@ namespace UnityExtensions
         /// </summary>
         public static void RegisterCommonIOMethods()
         {
-            if (_commonIORegistered) return;
-            _commonIORegistered = true;
-
             IOExtensions.Register((BinaryWriter writer, Vector2 value) =>
             {
                 writer.Write(value.x);
@@ -318,6 +319,9 @@ namespace UnityExtensions
                     while (true)
                     {
                         yield return wait;
+
+                        fixedFrameCount += 1;
+
                         waitForFixedUpdate?.Invoke();
 
                         if (waitForFixedUpdateOnce != null)
