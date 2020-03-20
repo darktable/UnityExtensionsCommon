@@ -17,8 +17,6 @@ namespace UnityExtensions
         static GameObject _globalGameObject;
         static IEnumerable<Type> _allAssemblyTypes;
 
-        public static Transform globalTransform => _globalGameObject.transform;
-
         public static event Action fixedUpdate;
         public static event Action waitForFixedUpdate;
         public static event Action update;
@@ -137,11 +135,6 @@ namespace UnityExtensions
                 case UpdateMode.LateUpdate: lateUpdate -= action; return;
                 case UpdateMode.WaitForEndOfFrame: waitForEndOfFrame -= action; return;
             }
-        }
-
-        public static T AddGlobalComponent<T>() where T : Component
-        {
-            return _globalGameObject.AddComponent<T>();
         }
 
         public static void Swap<T>(ref T a, ref T b)
