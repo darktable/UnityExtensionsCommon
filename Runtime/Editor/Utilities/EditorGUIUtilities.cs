@@ -350,7 +350,8 @@ namespace UnityExtensions.Editor
             Rect rect,
             float value01,
             Color backgroundColor,
-            Color foregroundColor)
+            Color foregroundColor,
+            bool draggable = true)
         {
             var progressRect = rect;
             progressRect.width = Mathf.Round(progressRect.width * value01);
@@ -370,8 +371,12 @@ namespace UnityExtensions.Editor
                         GUIUtility.hotControl = id;
                         _dragState = 1;
 
-                        float offset = current.mousePosition.x - rect.x + 1f;
-                        value01 = Mathf.Clamp01(offset / rect.width);
+                        if (draggable)
+                        {
+                            float offset = current.mousePosition.x - rect.x + 1f;
+                            value01 = Mathf.Clamp01(offset / rect.width);
+                        }
+
                         GUI.changed = true;
 
                         current.Use();
@@ -394,8 +399,12 @@ namespace UnityExtensions.Editor
                     }
                     if (_dragState != 0)
                     {
-                        float offset = current.mousePosition.x - rect.x + 1f;
-                        value01 = Mathf.Clamp01(offset / rect.width);
+                        if (draggable)
+                        {
+                            float offset = current.mousePosition.x - rect.x + 1f;
+                            value01 = Mathf.Clamp01(offset / rect.width);
+                        }
+
                         GUI.changed = true;
 
                         current.Use();
@@ -403,7 +412,7 @@ namespace UnityExtensions.Editor
                     break;
 
                 case EventType.Repaint:
-                    EditorGUIUtility.AddCursorRect(rect, MouseCursor.SlideArrow);
+                    if (draggable) EditorGUIUtility.AddCursorRect(rect, MouseCursor.SlideArrow);
                     break;
             }
 
@@ -420,9 +429,10 @@ namespace UnityExtensions.Editor
             Color backgroundColor,
             Color foregroundColor,
             Color borderColor,
-            bool drawForegroundBorder = false)
+            bool drawForegroundBorder = false,
+            bool draggable = true)
         {
-            float result = DragProgress(rect, value01, backgroundColor, foregroundColor);
+            float result = DragProgress(rect, value01, backgroundColor, foregroundColor, draggable);
 
             DrawWireRect(rect, borderColor);
 
