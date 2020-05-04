@@ -11,7 +11,7 @@ namespace UnityExtensions.Editor
     public struct EditorUtilities
     {
         static float _unscaledDeltaTime;
-        static double _lastTimeSinceStartup;
+        static double _lastTimeSinceStartup = -0.01;
 
 
         [InitializeOnLoadMethod]
