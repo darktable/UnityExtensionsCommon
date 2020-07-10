@@ -11,51 +11,43 @@ namespace UnityExtensions
     {
         [SerializeReference] T _parent;
         [SerializeReference] T _next;
-        [SerializeReference] T _previous;        // the previous of first child references the last child
+        [SerializeReference] T _previous;        // the previous of first child is last child
         [SerializeReference] T _firstChild;
-
 
         /// <summary>
         /// Parent node, return null if it does not exist.
         /// </summary>
         public T parent => _parent;
 
-
         /// <summary>
         /// Next node in the same hierarchy, return null if this node is the last one.
         /// </summary>
         public T next => _next;
-
 
         /// <summary>
         /// Previous node in the same hierarchy, return null if this node is the first one.
         /// </summary>
         public T previous => (_parent != null && _parent._firstChild == this) ? null : _previous;
 
-
         /// <summary>
         /// First child node, return null if no child.
         /// </summary>
         public T firstChild => _firstChild;
-
 
         /// <summary>
         /// Last child node, return null if no child.
         /// </summary>
         public T lastChild => _firstChild?._previous;
 
-
         /// <summary>
         /// Is this node a root node?
         /// </summary>
         public bool isRoot => _parent == null;
 
-
         /// <summary>
         /// Is this node a leaf node?
         /// </summary>
         public bool isLeaf => _firstChild == null;
-
 
         /// <summary>
         /// Number of direct children. Time complexity: O(n) - n is number of direct children.
@@ -75,7 +67,6 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Depth of this node. Depth of a root node is zero. Time complexity: O(n) - n is depth of this node.
         /// </summary>
@@ -94,7 +85,6 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Root node of this tree. Time complexity: O(n) - n is depth of this node.
         /// </summary>
@@ -111,13 +101,11 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Get a enumerable instance to foreach all children (include this node).
         /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
         public ChildrenEnumerable children => new ChildrenEnumerable((T)this);
-
 
         /// <summary>
         /// Get a enumerable instance to foreach all parents (include this node).
@@ -125,17 +113,14 @@ namespace UnityExtensions
         /// </summary>
         public ParentsEnumerable parents => new ParentsEnumerable((T)this);
 
-
         /// <summary>
         /// Get a enumerable instance to foreach all direct children.
         /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
         public DirectChildrenEnumerable directChildren => new DirectChildrenEnumerable((T)this);
 
-
         /// <summary>
         /// Attach to a specified node as the first child.
-        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAsFirst(T parent)
         {
@@ -158,10 +143,8 @@ namespace UnityExtensions
             parent._firstChild = self;
         }
 
-
         /// <summary>
         /// Attach to a specified node as the last child.
-        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAsLast(T parent)
         {
@@ -183,10 +166,8 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Attach to a specified node before a child of it.
-        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachBefore(T parent, T next)
         {
@@ -206,10 +187,8 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Attach to a specified node after a child of it.
-        /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
         public void AttachAfter(T parent, T previous)
         {
@@ -223,7 +202,6 @@ namespace UnityExtensions
             _next = previous._next;
             previous._next = self;
         }
-
 
         /// <summary>
         /// Detach from parent node.
@@ -249,7 +227,6 @@ namespace UnityExtensions
             }
         }
 
-
         /// <summary>
         /// Detach from all direct children.
         /// </summary>
@@ -269,7 +246,6 @@ namespace UnityExtensions
 
             _firstChild = null;
         }
-
 
         /// <summary>
         /// Is this node a child of a specified node?
@@ -311,7 +287,6 @@ namespace UnityExtensions
 #endif
         }
 
-
         void InternalValidateChild(T node)
         {
             if (node == null)
@@ -343,7 +318,6 @@ namespace UnityExtensions
                 return new ChildrenEnumerator(_node);
             }
         }
-
 
         public struct ChildrenEnumerator
         {
@@ -397,7 +371,6 @@ namespace UnityExtensions
             }
         }
 
-
         public struct ParentsEnumerable
         {
             T _node;
@@ -412,7 +385,6 @@ namespace UnityExtensions
                 return new ParentsEnumerator(_node);
             }
         }
-
 
         public struct ParentsEnumerator
         {
@@ -446,7 +418,6 @@ namespace UnityExtensions
             }
         }
 
-
         public struct DirectChildrenEnumerable
         {
             T _node;
@@ -461,7 +432,6 @@ namespace UnityExtensions
                 return new DirectChildrenEnumerator(_node);
             }
         }
-
 
         public struct DirectChildrenEnumerator
         {
