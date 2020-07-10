@@ -7,213 +7,42 @@ namespace UnityExtensions
     /// TreeNode
     /// </summary>
     [Serializable]
-    public class TreeNode<Node> where Node : TreeNode<Node>
+    public class TreeNode<T> where T : TreeNode<T>
     {
-        [SerializeReference] Node _parent;
-        [SerializeReference] Node _next;
-        [SerializeReference] Node _previous;        // the previous of first child references the last child
-        [SerializeReference] Node _firstChild;
-
-
-        #region Enumerable & Enumerator
-
-        public struct ChildrenEnumerable
-        {
-            Node _node;
-
-            internal ChildrenEnumerable(Node node)
-            {
-                _node = node;
-            }
-
-            public ChildrenEnumerator GetEnumerator()
-            {
-                return new ChildrenEnumerator(_node);
-            }
-        }
-
-
-        public struct ChildrenEnumerator
-        {
-            Node _root;
-
-            internal ChildrenEnumerator(Node node)
-            {
-                _root = node;
-                Current = null;
-            }
-
-            public Node Current { get; private set; }
-
-            public bool MoveNext()
-            {
-                if (Current != null)
-                {
-                    if (Current._firstChild != null)
-                    {
-                        Current = Current._firstChild;
-                        return true;
-                    }
-                    else
-                    {
-                        while (Current != _root)
-                        {
-                            if (Current.next != null)
-                            {
-                                Current = Current._next;
-                                return true;
-                            }
-                            else
-                            {
-                                Current = Current._parent;
-                            }
-                        }
-                        Current = null;
-                        return false;
-                    }
-                }
-                else
-                {
-                    Current = _root;
-                    return true;
-                }
-            }
-
-            public void Reset()
-            {
-                Current = null;
-            }
-        }
-
-
-        public struct ParentsEnumerable
-        {
-            Node _node;
-
-            internal ParentsEnumerable(Node node)
-            {
-                _node = node;
-            }
-
-            public ParentsEnumerator GetEnumerator()
-            {
-                return new ParentsEnumerator(_node);
-            }
-        }
-
-
-        public struct ParentsEnumerator
-        {
-            Node _node;
-
-            internal ParentsEnumerator(Node node)
-            {
-                _node = node;
-                Current = null;
-            }
-
-            public Node Current { get; private set; }
-
-            public bool MoveNext()
-            {
-                if (Current != null)
-                {
-                    Current = Current._parent;
-                    return Current != null;
-                }
-                else
-                {
-                    Current = _node;
-                    return true;
-                }
-            }
-
-            public void Reset()
-            {
-                Current = null;
-            }
-        }
-
-
-        public struct DirectChildrenEnumerable
-        {
-            Node _node;
-
-            internal DirectChildrenEnumerable(Node node)
-            {
-                _node = node;
-            }
-
-            public DirectChildrenEnumerator GetEnumerator()
-            {
-                return new DirectChildrenEnumerator(_node);
-            }
-        }
-
-
-        public struct DirectChildrenEnumerator
-        {
-            Node _node;
-
-            internal DirectChildrenEnumerator(Node node)
-            {
-                _node = node;
-                Current = null;
-            }
-
-            public Node Current { get; private set; }
-
-            public bool MoveNext()
-            {
-                if (Current != null)
-                {
-                    Current = Current.next;
-                }
-                else
-                {
-                    Current = _node._firstChild;
-                }
-
-                return Current != null;
-            }
-
-            public void Reset()
-            {
-                Current = null;
-            }
-        }
-
-        #endregion
+        [SerializeReference] T _parent;
+        [SerializeReference] T _next;
+        [SerializeReference] T _previous;        // the previous of first child references the last child
+        [SerializeReference] T _firstChild;
 
 
         /// <summary>
         /// Parent node, return null if it does not exist.
         /// </summary>
-        public Node parent => _parent;
+        public T parent => _parent;
 
 
         /// <summary>
         /// Next node in the same hierarchy, return null if this node is the last one.
         /// </summary>
-        public Node next => _next;
+        public T next => _next;
 
 
         /// <summary>
         /// Previous node in the same hierarchy, return null if this node is the first one.
         /// </summary>
-        public Node previous => (_parent != null && _parent._firstChild == this) ? null : _previous;
+        public T previous => (_parent != null && _parent._firstChild == this) ? null : _previous;
 
 
         /// <summary>
         /// First child node, return null if no child.
         /// </summary>
-        public Node firstChild => _firstChild;
+        public T firstChild => _firstChild;
 
 
         /// <summary>
         /// Last child node, return null if no child.
         /// </summary>
-        public Node lastChild => _firstChild?._previous;
+        public T lastChild => _firstChild?._previous;
 
 
         /// <summary>
@@ -269,11 +98,11 @@ namespace UnityExtensions
         /// <summary>
         /// Root node of this tree. Time complexity: O(n) - n is depth of this node.
         /// </summary>
-        public Node root
+        public T root
         {
             get
             {
-                var node = this as Node;
+                var node = (T)this;
                 while (node._parent != null)
                 {
                     node = node._parent;
@@ -287,33 +116,33 @@ namespace UnityExtensions
         /// Get a enumerable instance to foreach all children (include this node).
         /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
-        public ChildrenEnumerable children => new ChildrenEnumerable(this as Node);
+        public ChildrenEnumerable children => new ChildrenEnumerable((T)this);
 
 
         /// <summary>
         /// Get a enumerable instance to foreach all parents (include this node).
         /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
-        public ParentsEnumerable parents => new ParentsEnumerable(this as Node);
+        public ParentsEnumerable parents => new ParentsEnumerable((T)this);
 
 
         /// <summary>
         /// Get a enumerable instance to foreach all direct children.
         /// Note: can not change the structure of this tree inside the foreach.
         /// </summary>
-        public DirectChildrenEnumerable directChildren => new DirectChildrenEnumerable(this as Node);
+        public DirectChildrenEnumerable directChildren => new DirectChildrenEnumerable((T)this);
 
 
         /// <summary>
         /// Attach to a specified node as the first child.
         /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
-        public void AttachAsFirst(Node parent)
+        public void AttachAsFirst(T parent)
         {
             InternalValidateAttaching(parent);
 
             _parent = parent;
-            var self = this as Node;
+            var self = (T)this;
 
             if (parent._firstChild != null)
             {
@@ -334,12 +163,12 @@ namespace UnityExtensions
         /// Attach to a specified node as the last child.
         /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
-        public void AttachAsLast(Node parent)
+        public void AttachAsLast(T parent)
         {
             InternalValidateAttaching(parent);
 
             _parent = parent;
-            var self = this as Node;
+            var self = (T)this;
 
             if (parent._firstChild != null)
             {
@@ -359,13 +188,13 @@ namespace UnityExtensions
         /// Attach to a specified node before a child of it.
         /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
-        public void AttachBefore(Node parent, Node next)
+        public void AttachBefore(T parent, T next)
         {
             InternalValidateAttaching(parent);
             parent.InternalValidateChild(next);
 
             _parent = parent;
-            var self = this as Node;
+            var self = (T)this;
 
             _previous = next._previous;
             _next = next;
@@ -382,13 +211,13 @@ namespace UnityExtensions
         /// Attach to a specified node after a child of it.
         /// Note: Use TREE_NODE_STRICT to check if the specified node is a child of this node.
         /// </summary>
-        public void AttachAfter(Node parent, Node previous)
+        public void AttachAfter(T parent, T previous)
         {
             InternalValidateAttaching(parent);
             parent.InternalValidateChild(previous);
 
             _parent = parent;
-            var self = this as Node;
+            var self = (T)this;
 
             _previous = previous;
             _next = previous._next;
@@ -426,7 +255,7 @@ namespace UnityExtensions
         /// </summary>
         public void DetachChildren()
         {
-            Node child;
+            T child;
 
             child = _firstChild;
             while (child != null)
@@ -445,7 +274,7 @@ namespace UnityExtensions
         /// <summary>
         /// Is this node a child of a specified node?
         /// </summary>
-        public bool IsChildOf(Node parent)
+        public bool IsChildOf(T parent)
         {
             if (parent == null)
             {
@@ -453,20 +282,18 @@ namespace UnityExtensions
             }
 
             var node = this;
-            do
+            while (node != parent)
             {
-                if (node == parent) return true;
                 node = node._parent;
+                if (node == null) return false;
             }
-            while (node != null);
-
-            return false;
+            return true;
         }
 
 
         #region Internal
 
-        void InternalValidateAttaching(Node parent)
+        void InternalValidateAttaching(T parent)
         {
             if (_parent != null)
             {
@@ -476,8 +303,8 @@ namespace UnityExtensions
             {
                 throw new ArgumentNullException("parent");
             }
-#if TREE_NODE_STRICT
-            if (parent.IsChildOf(this))
+#if DEBUG
+            if (parent.IsChildOf((T)this))
             {
                 throw new InvalidOperationException("new parent is a child of this node");
             }
@@ -485,7 +312,7 @@ namespace UnityExtensions
         }
 
 
-        void InternalValidateChild(Node node)
+        void InternalValidateChild(T node)
         {
             if (node == null)
             {
@@ -499,6 +326,177 @@ namespace UnityExtensions
 
         #endregion
 
-    } // class TreeNode<Node>
+
+        #region Enumerable & Enumerator
+
+        public struct ChildrenEnumerable
+        {
+            T _node;
+
+            internal ChildrenEnumerable(T node)
+            {
+                _node = node;
+            }
+
+            public ChildrenEnumerator GetEnumerator()
+            {
+                return new ChildrenEnumerator(_node);
+            }
+        }
+
+
+        public struct ChildrenEnumerator
+        {
+            T _root;
+
+            internal ChildrenEnumerator(T node)
+            {
+                _root = node;
+                Current = null;
+            }
+
+            public T Current { get; private set; }
+
+            public bool MoveNext()
+            {
+                if (Current != null)
+                {
+                    if (Current._firstChild != null)
+                    {
+                        Current = Current._firstChild;
+                        return true;
+                    }
+                    else
+                    {
+                        while (Current != _root)
+                        {
+                            if (Current.next != null)
+                            {
+                                Current = Current._next;
+                                return true;
+                            }
+                            else
+                            {
+                                Current = Current._parent;
+                            }
+                        }
+                        Current = null;
+                        return false;
+                    }
+                }
+                else
+                {
+                    Current = _root;
+                    return true;
+                }
+            }
+
+            public void Reset()
+            {
+                Current = null;
+            }
+        }
+
+
+        public struct ParentsEnumerable
+        {
+            T _node;
+
+            internal ParentsEnumerable(T node)
+            {
+                _node = node;
+            }
+
+            public ParentsEnumerator GetEnumerator()
+            {
+                return new ParentsEnumerator(_node);
+            }
+        }
+
+
+        public struct ParentsEnumerator
+        {
+            T _node;
+
+            internal ParentsEnumerator(T node)
+            {
+                _node = node;
+                Current = null;
+            }
+
+            public T Current { get; private set; }
+
+            public bool MoveNext()
+            {
+                if (Current != null)
+                {
+                    Current = Current._parent;
+                    return Current != null;
+                }
+                else
+                {
+                    Current = _node;
+                    return true;
+                }
+            }
+
+            public void Reset()
+            {
+                Current = null;
+            }
+        }
+
+
+        public struct DirectChildrenEnumerable
+        {
+            T _node;
+
+            internal DirectChildrenEnumerable(T node)
+            {
+                _node = node;
+            }
+
+            public DirectChildrenEnumerator GetEnumerator()
+            {
+                return new DirectChildrenEnumerator(_node);
+            }
+        }
+
+
+        public struct DirectChildrenEnumerator
+        {
+            T _node;
+
+            internal DirectChildrenEnumerator(T node)
+            {
+                _node = node;
+                Current = null;
+            }
+
+            public T Current { get; private set; }
+
+            public bool MoveNext()
+            {
+                if (Current != null)
+                {
+                    Current = Current.next;
+                }
+                else
+                {
+                    Current = _node._firstChild;
+                }
+
+                return Current != null;
+            }
+
+            public void Reset()
+            {
+                Current = null;
+            }
+        }
+
+        #endregion
+
+    } // class TreeNode<T>
 
 } // namespace UnityExtensions
