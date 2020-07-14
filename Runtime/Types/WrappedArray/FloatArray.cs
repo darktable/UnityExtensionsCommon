@@ -37,7 +37,7 @@ namespace UnityExtensions
     }
 
     [Serializable]
-    public struct FloatList : IWrappedList, IEquatable<FloatList>, IEquatable<List<float>>
+    public struct FloatList : IWrappedArray, IEquatable<FloatList>, IEquatable<List<float>>
     {
         public List<float> data;
         public int count => data.Count;

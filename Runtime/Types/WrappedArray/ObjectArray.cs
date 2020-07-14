@@ -38,7 +38,7 @@ namespace UnityExtensions
     }
 
     [Serializable]
-    public struct ObjectList : IWrappedList, IEquatable<ObjectList>, IEquatable<List<UnityObject>>
+    public struct ObjectList : IWrappedArray, IEquatable<ObjectList>, IEquatable<List<UnityObject>>
     {
         public List<UnityObject> data;
         public int count => data.Count;

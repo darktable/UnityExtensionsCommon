@@ -10,14 +10,6 @@ namespace UnityExtensions
 {
     public interface IWrappedArray
     {
-        int length { get; }
-        bool isNullOrEmpty { get; }
-    }
-
-    public interface IWrappedList
-    {
-        int count { get; }
-        bool isNullOrEmpty { get; }
     }
 
     public static class WrappedArrayCodeGenerator
@@ -78,7 +70,7 @@ namespace {nameSpace}
     }}
 
     [Serializable]
-    public struct {T}List : IWrappedList, IEquatable<{T}List>, IEquatable<List<{t}>>
+    public struct {T}List : IWrappedArray, IEquatable<{T}List>, IEquatable<List<{t}>>
     {{
         public List<{t}> data;
         public int count => data.Count;
@@ -193,7 +185,6 @@ namespace {nameSpace}
 
 
         [CustomPropertyDrawer(typeof(IWrappedArray), true)]
-        [CustomPropertyDrawer(typeof(IWrappedList), true)]
         public class WrappedArrayDrawer : PropertyDrawer
         {
             ReorderableList _list;

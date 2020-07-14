@@ -38,7 +38,7 @@ namespace UnityExtensions
     }
 
     [Serializable]
-    public struct Vector2List : IWrappedList, IEquatable<Vector2List>, IEquatable<List<Vector2>>
+    public struct Vector2List : IWrappedArray, IEquatable<Vector2List>, IEquatable<List<Vector2>>
     {
         public List<Vector2> data;
         public int count => data.Count;
