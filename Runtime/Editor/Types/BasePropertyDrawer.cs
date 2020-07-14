@@ -12,12 +12,12 @@ namespace UnityExtensions.Editor
         /// </summary>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return EditorGUI.GetPropertyHeight(property, label, property.hasVisibleChildren);
+            return EditorGUI.GetPropertyHeight(property, label, property.isExpanded);
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.PropertyField(position, property, label, property.hasVisibleChildren);
+            EditorGUI.PropertyField(position, property, label, property.isExpanded);
         }
 
     } // BasePropertyDrawer

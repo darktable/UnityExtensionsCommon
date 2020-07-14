@@ -10,10 +10,10 @@ namespace UnityExtensions.Editor
     {
         float _orginal;
 
-        public static LabelWidthScope New(float value)
+        public static LabelWidthScope New(float value, bool relative = false)
         {
             var scope = new LabelWidthScope { _orginal = EditorGUIUtility.labelWidth };
-            EditorGUIUtility.labelWidth = value;
+            EditorGUIUtility.labelWidth = relative ? (value + scope._orginal) : value;
             return scope;
         }
 
