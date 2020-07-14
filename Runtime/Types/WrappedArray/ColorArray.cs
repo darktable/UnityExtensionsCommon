@@ -1,11 +1,11 @@
 
 using System;
 using System.Collections.Generic;
+using UnityExtensions;
 using UnityEngine;
 
 namespace UnityExtensions
 {
-
     [Serializable]
     public struct ColorArray : IWrappedArray, IEquatable<ColorArray>, IEquatable<Color[]>
     {
@@ -25,8 +25,17 @@ namespace UnityExtensions
         public bool Equals(ColorArray other) => data == other.data;
         public bool Equals(Color[] other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
-    }
+        public Enumerator GetEnumerator() => new Enumerator(data);
 
+        public struct Enumerator
+        {
+            Color[] _data; int _index;
+            internal Enumerator(Color[] data) { _data = data; _index = -1; }
+            public Color Current => _data[_index];
+            public bool MoveNext() => (++_index) < _data.Length;
+            public void Reset() => _index = -1;
+        }
+    }
 
     [Serializable]
     public struct ColorList : IWrappedList, IEquatable<ColorList>, IEquatable<List<Color>>
@@ -47,6 +56,6 @@ namespace UnityExtensions
         public bool Equals(ColorList other) => data == other.data;
         public bool Equals(List<Color> other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
+        public List<Color>.Enumerator GetEnumerator() => data.GetEnumerator();
     }
-
 }

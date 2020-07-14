@@ -22,7 +22,7 @@ namespace UnityExtensions
 
     public static class WrappedArrayCodeGenerator
     {
-        public static string Generate(string[] usingItems, string elementTypeName, string wrappedTypeNamePrefix)
+        public static string Generate(string[] usingItems, string nameSpace, string elementTypeName, string wrappedTypeNamePrefix)
         {
             string usings = "";
             if (usingItems != null)
@@ -41,11 +41,11 @@ namespace UnityExtensions
 //-----------------------------------------------------------------------------
 $@"
 using System;
-using System.Collections.Generic;{usings}
+using System.Collections.Generic;
+using UnityExtensions;{usings}
 
-namespace UnityExtensions
+namespace {nameSpace}
 {{
-
     [Serializable]
     public struct {T}Array : IWrappedArray, IEquatable<{T}Array>, IEquatable<{t}[]>
     {{
@@ -65,8 +65,17 @@ namespace UnityExtensions
         public bool Equals({T}Array other) => data == other.data;
         public bool Equals({t}[] other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
-    }}
+        public Enumerator GetEnumerator() => new Enumerator(data);
 
+        public struct Enumerator
+        {{
+            {t}[] _data; int _index;
+            internal Enumerator({t}[] data) {{ _data = data; _index = -1; }}
+            public {t} Current => _data[_index];
+            public bool MoveNext() => (++_index) < _data.Length;
+            public void Reset() => _index = -1;
+        }}
+    }}
 
     [Serializable]
     public struct {T}List : IWrappedList, IEquatable<{T}List>, IEquatable<List<{t}>>
@@ -87,8 +96,8 @@ namespace UnityExtensions
         public bool Equals({T}List other) => data == other.data;
         public bool Equals(List<{t}> other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
+        public List<{t}>.Enumerator GetEnumerator() => data.GetEnumerator();
     }}
-
 }}
 ";
 //-----------------------------------------------------------------------------
@@ -102,10 +111,12 @@ namespace UnityExtensions
         class WrappedArrayCodeGeneratorWindow : EditorWindow
         {
             [SerializeField] string[] _usingItems = new string[] { "UnityObject = UnityEngine.Object" };
+            [SerializeField] string _nameSpace = "UnityExtensions";
             [SerializeField] string _elementTypeName = "UnityObject";
             [SerializeField] string _wrappedTypeNamePrefix = "Object";
 
             SerializedObject _serializedObject;
+            SerializedProperty _nameSpaceProp;
             SerializedProperty _usingItemsProp;
             SerializedProperty _elementTypeNameProp;
             SerializedProperty _wrappedTypeNamePrefixProp;
@@ -124,6 +135,7 @@ namespace UnityExtensions
             {
                 _serializedObject = new SerializedObject(this);
                 _usingItemsProp = _serializedObject.FindProperty(nameof(_usingItems));
+                _nameSpaceProp = _serializedObject.FindProperty(nameof(_nameSpace));
                 _elementTypeNameProp = _serializedObject.FindProperty(nameof(_elementTypeName));
                 _wrappedTypeNamePrefixProp = _serializedObject.FindProperty(nameof(_wrappedTypeNamePrefix));
             }
@@ -141,6 +153,7 @@ namespace UnityExtensions
                     {
                         _serializedObject.Update();
                         EditorGUILayout.PropertyField(_usingItemsProp);
+                        EditorGUILayout.PropertyField(_nameSpaceProp);
                         EditorGUILayout.PropertyField(_elementTypeNameProp);
                         EditorGUILayout.PropertyField(_wrappedTypeNamePrefixProp);
                         _serializedObject.ApplyModifiedProperties();
@@ -152,7 +165,7 @@ namespace UnityExtensions
                     {
                         if (GUI.Button(rect, "Generate Code"))
                         {
-                            _generatedCode = WrappedArrayCodeGenerator.Generate(_usingItems, _elementTypeName, _wrappedTypeNamePrefix);
+                            _generatedCode = WrappedArrayCodeGenerator.Generate(_usingItems, _nameSpace, _elementTypeName, _wrappedTypeNamePrefix);
                         }
                     }
 
@@ -161,7 +174,7 @@ namespace UnityExtensions
                     {
                         if (GUI.Button(rect, "Save \".cs\" File..."))
                         {
-                            var path = EditorUtility.SaveFilePanelInProject("Save \".cs\" File...", $"{_wrappedTypeNamePrefix}Array", "cs", "");
+                            var path = EditorUtility.SaveFilePanel("Save \".cs\" File...", "Assets", $"{_wrappedTypeNamePrefix}Array", "cs");
                             if (!string.IsNullOrWhiteSpace(path))
                             {
                                 File.WriteAllText(path, _generatedCode, System.Text.Encoding.Default);

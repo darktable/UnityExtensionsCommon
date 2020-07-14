@@ -1,10 +1,10 @@
 
 using System;
 using System.Collections.Generic;
+using UnityExtensions;
 
 namespace UnityExtensions
 {
-
     [Serializable]
     public struct StringArray : IWrappedArray, IEquatable<StringArray>, IEquatable<string[]>
     {
@@ -24,8 +24,17 @@ namespace UnityExtensions
         public bool Equals(StringArray other) => data == other.data;
         public bool Equals(string[] other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
-    }
+        public Enumerator GetEnumerator() => new Enumerator(data);
 
+        public struct Enumerator
+        {
+            string[] _data; int _index;
+            internal Enumerator(string[] data) { _data = data; _index = -1; }
+            public string Current => _data[_index];
+            public bool MoveNext() => (++_index) < _data.Length;
+            public void Reset() => _index = -1;
+        }
+    }
 
     [Serializable]
     public struct StringList : IWrappedList, IEquatable<StringList>, IEquatable<List<string>>
@@ -46,6 +55,6 @@ namespace UnityExtensions
         public bool Equals(StringList other) => data == other.data;
         public bool Equals(List<string> other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
+        public List<string>.Enumerator GetEnumerator() => data.GetEnumerator();
     }
-
 }

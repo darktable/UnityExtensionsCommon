@@ -1,10 +1,10 @@
 
 using System;
 using System.Collections.Generic;
+using UnityExtensions;
 
 namespace UnityExtensions
 {
-
     [Serializable]
     public struct FloatArray : IWrappedArray, IEquatable<FloatArray>, IEquatable<float[]>
     {
@@ -24,8 +24,17 @@ namespace UnityExtensions
         public bool Equals(FloatArray other) => data == other.data;
         public bool Equals(float[] other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
-    }
+        public Enumerator GetEnumerator() => new Enumerator(data);
 
+        public struct Enumerator
+        {
+            float[] _data; int _index;
+            internal Enumerator(float[] data) { _data = data; _index = -1; }
+            public float Current => _data[_index];
+            public bool MoveNext() => (++_index) < _data.Length;
+            public void Reset() => _index = -1;
+        }
+    }
 
     [Serializable]
     public struct FloatList : IWrappedList, IEquatable<FloatList>, IEquatable<List<float>>
@@ -46,6 +55,6 @@ namespace UnityExtensions
         public bool Equals(FloatList other) => data == other.data;
         public bool Equals(List<float> other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
+        public List<float>.Enumerator GetEnumerator() => data.GetEnumerator();
     }
-
 }

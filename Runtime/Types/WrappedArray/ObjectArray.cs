@@ -1,11 +1,11 @@
 
 using System;
 using System.Collections.Generic;
+using UnityExtensions;
 using UnityObject = UnityEngine.Object;
 
 namespace UnityExtensions
 {
-
     [Serializable]
     public struct ObjectArray : IWrappedArray, IEquatable<ObjectArray>, IEquatable<UnityObject[]>
     {
@@ -25,8 +25,17 @@ namespace UnityExtensions
         public bool Equals(ObjectArray other) => data == other.data;
         public bool Equals(UnityObject[] other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
-    }
+        public Enumerator GetEnumerator() => new Enumerator(data);
 
+        public struct Enumerator
+        {
+            UnityObject[] _data; int _index;
+            internal Enumerator(UnityObject[] data) { _data = data; _index = -1; }
+            public UnityObject Current => _data[_index];
+            public bool MoveNext() => (++_index) < _data.Length;
+            public void Reset() => _index = -1;
+        }
+    }
 
     [Serializable]
     public struct ObjectList : IWrappedList, IEquatable<ObjectList>, IEquatable<List<UnityObject>>
@@ -47,6 +56,6 @@ namespace UnityExtensions
         public bool Equals(ObjectList other) => data == other.data;
         public bool Equals(List<UnityObject> other) => data == other;
         public override int GetHashCode() => data.GetHashCode();
+        public List<UnityObject>.Enumerator GetEnumerator() => data.GetEnumerator();
     }
-
 }
