@@ -102,7 +102,7 @@ namespace {nameSpace}
     {
         class WrappedArrayCodeGeneratorWindow : EditorWindow
         {
-            [SerializeField] string[] _usingItems = new string[] { "UnityObject = UnityEngine.Object" };
+            [SerializeField] StringArray _usingItems = new string[] { "UnityObject = UnityEngine.Object" };
             [SerializeField] string _nameSpace = "UnityExtensions";
             [SerializeField] string _elementTypeName = "UnityObject";
             [SerializeField] string _wrappedTypeNamePrefix = "Object";
