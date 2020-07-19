@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace UnityExtensions
@@ -209,6 +211,102 @@ namespace UnityExtensions
         {
             return type.GetStaticMethod(methodName).Invoke(null, parameters);
         }
+
+
+        ///// <summary>
+        ///// GetSubInstanceFields
+        ///// </summary>
+        ///// <param name="type"></param>
+        ///// <param name="subFieldPath"> "a.b.c" </param>
+        ///// <returns></returns>
+        //public static FieldInfo[] GetSubInstanceFields(this Type type, string subFieldPath)
+        //{
+        //    var names = subFieldPath.Split('.');
+        //    FieldInfo[] results = new FieldInfo[names.Length];
+
+        //    for (int i = 0; i < names.Length; i++)
+        //    {
+        //        var field = type.GetInstanceField(names[i]);
+        //        type = field.FieldType; // field type is unsafe 
+        //        results[i] = field;
+        //    }
+
+        //    return results;
+        //}
+
+
+        //public static object GetFieldValue(this object instance, params FieldInfo[] subFields)
+        //{
+        //    for (int i = 0; i < subFields.Length; i++)
+        //    {
+        //        instance = subFields[i].GetValue(instance);
+        //    }
+        //    return instance;
+        //}
+
+
+        ///// <summary>
+        ///// GetSubInstanceFieldsIncludeArrayOrList
+        ///// </summary>
+        ///// <param name="type"></param>
+        ///// <param name="subFieldPath"> "a.b[].c[3]" </param>
+        ///// <returns></returns>
+        //public static FieldInfo[] GetSubInstanceFieldsIncludeArrayOrList(this Type type, string subFieldPath)
+        //{
+        //    var names = subFieldPath.Split('.');
+        //    FieldInfo[] results = new FieldInfo[names.Length];
+
+        //    for (int i = 0; i < names.Length; i++)
+        //    {
+        //        var name = names[i];
+        //        bool isArray = false;
+
+        //        if (name[name.Length-1] == ']')
+        //        {
+        //            name = name.Substring(0, name.IndexOf('['));
+        //            isArray = true;
+        //        }
+
+        //        var field = type.GetInstanceField(name);
+        //        type = field.FieldType; // field type is unsafe
+        //        if (isArray) type = type.GetArrayOrListElementType(); // element type is unsafe
+
+        //        results[i] = field;
+        //    }
+
+        //    return results;
+        //}
+
+
+        ///// <summary>
+        ///// Support IList fields and element index.
+        ///// </summary>
+        ///// <param name="instance"></param>
+        ///// <param name="subFieldPath"> a.b[2].c[3] </param>
+        ///// <param name="subFields"></param>
+        ///// <returns></returns>
+        //public static object GetFieldValue(this object instance, string subFieldPath, params FieldInfo[] subFields)
+        //{
+        //    int dotIndex = -1;
+        //    for (int i = 0; i < subFields.Length; i++)
+        //    {
+        //        if (i != subFields.Length - 1)
+        //        {
+        //            dotIndex = subFieldPath.IndexOf('.', dotIndex + 1);
+        //        }
+        //        else dotIndex = subFieldPath.Length;
+
+        //        instance = subFields[i].GetValue(instance);
+
+        //        if (subFieldPath[dotIndex - 1] == ']')
+        //        {
+        //            int index = subFieldPath.LastIndexOf('[', dotIndex - 1) + 1;
+        //            index = int.Parse(subFieldPath.Substring(index, dotIndex - index - 1));
+        //            instance = ((IList)instance)[index];
+        //        }
+        //    }
+        //    return instance;
+        //}
 
     } // class Extensions
 

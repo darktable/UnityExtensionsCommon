@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.Reflection;
+using System.Collections;
 
 namespace UnityExtensions.Editor
 {
@@ -15,6 +17,52 @@ namespace UnityExtensions.Editor
         Normal,
         Selected,
         Disabled,
+    }
+
+
+    public struct SubFieldID : IEquatable<SubFieldID>
+    {
+        public object root;
+        public string path;
+
+        public SubFieldID(object root, string path)
+        {
+            this.root = root;
+            this.path = path;
+        }
+
+        public SubFieldID(SerializedProperty property)
+        {
+            this.root = property.serializedObject.targetObject;
+            this.path = property.propertyPath;
+        }
+
+        public static bool operator ==(SubFieldID a, SubFieldID b)
+        {
+            return a.root == b.root && a.path == b.path;
+        }
+
+        public static bool operator !=(SubFieldID a, SubFieldID b)
+        {
+            return a.root != b.root || a.path != b.path;
+        }
+
+        public bool Equals(SubFieldID other)
+        {
+            return root == other.root && path == other.path;
+        }
+
+        public override bool Equals(object obj) => throw new Exception("What are you doing?");
+
+        public override int GetHashCode() => root.GetHashCode() ^ path.GetHashCode();
+    }
+
+
+    public struct SubFieldInfo
+    {
+        public FieldInfo fieldInfo;
+        public int listIndex;
+        public Type actualType;
     }
 
 
@@ -37,6 +85,9 @@ namespace UnityExtensions.Editor
 
         static int _dragState;
         static Vector2 _dragPos;
+
+        static Dictionary<SubFieldID, SubFieldInfo[]> _subFieldsDictionary = new Dictionary<SubFieldID, SubFieldInfo[]>(256);
+        static Stack<object> _parentObjects = new Stack<object>(16);
 
 
         public static GUIStyle buttonStyle
@@ -148,6 +199,13 @@ namespace UnityExtensions.Editor
         }
 
 
+        public static float GetMultipleLinesHeight(int lines)
+        {
+            float spacing = EditorGUIUtility.standardVerticalSpacing;
+            return (EditorGUIUtility.singleLineHeight + spacing) * lines - spacing;
+        }
+
+
         /// <summary>
         /// Get a temporary GUIContent（use this to avoid GC).
         /// </summary>
@@ -201,70 +259,83 @@ namespace UnityExtensions.Editor
         }
 
 
-        public static Vector2 SingleLineVector2Field(Rect rect, Vector2 value, GUIContent label)
+        public static Vector2 SingleLineVector2Field(Rect rect, GUIContent label, Vector2 value, string subLabel1 = "X", string subLabel2 = "Y")
         {
-            rect = EditorGUI.PrefixLabel(rect, label);
-            using (LabelWidthScope.New(14))
+            rect = EditorGUI.PrefixLabel(rect, GUIUtility.GetControlID(label, FocusType.Keyboard, rect), label);
+
+            using (LabelWidthScope.New(12))
             {
                 using (IndentLevelScope.New(0, false))
                 {
                     rect.width = (rect.width - 4) * 0.5f;
-                    value.x = EditorGUI.FloatField(rect, "X", value.x);
+                    value.x = EditorGUI.FloatField(rect, subLabel1, value.x);
                     rect.x = rect.xMax + 4;
-                    value.y = EditorGUI.FloatField(rect, "Y", value.y);
+                    value.y = EditorGUI.FloatField(rect, subLabel2, value.y);
                 }
             }
             return value;
         }
 
 
-        public static Vector2 SingleLineVector2Field(Rect rect, Vector2 value, GUIContent label, float aspectRatio)
+        public static Vector2Int SingleLineVector2IntField(Rect rect,GUIContent label, Vector2Int value, string subLabel1 = "X", string subLabel2 = "Y")
         {
-            rect = EditorGUI.PrefixLabel(rect, label);
-            using (LabelWidthScope.New(14))
+            rect = EditorGUI.PrefixLabel(rect, GUIUtility.GetControlID(label, FocusType.Keyboard, rect), label);
+
+            using (LabelWidthScope.New(12))
             {
                 using (IndentLevelScope.New(0, false))
                 {
                     rect.width = (rect.width - 4) * 0.5f;
-                    using (var scope = ChangeCheckScope.New())
-                    {
-                        value.x = EditorGUI.FloatField(rect, "X", value.x);
-                        if (scope.changed) value.y = value.x / aspectRatio;
-                    }
-
+                    value.x = EditorGUI.IntField(rect, subLabel1, value.x);
                     rect.x = rect.xMax + 4;
-                    using (var scope = ChangeCheckScope.New())
-                    {
-                        value.y = EditorGUI.FloatField(rect, "Y", value.y);
-                        if (scope.changed) value.x = value.y * aspectRatio;
-                    }
+                    value.y = EditorGUI.IntField(rect, subLabel2, value.y);
                 }
             }
             return value;
         }
 
 
-        public static void SingleLineVector2Field(Rect rect, SerializedProperty property, GUIContent label)
+        public static Vector4 TwoLinesVector4Field(Rect rect, GUIContent label, Vector4 value, string subLabel1 = "X", string subLabel2 = "Y", string subLabel3 = "Z", string subLabel4 = "W")
         {
-            property.vector2Value = SingleLineVector2Field(rect, property.vector2Value, label);
+            var xy = new Vector2(value.x, value.y);
+            rect.height = EditorGUIUtility.singleLineHeight;
+            xy = SingleLineVector2Field(rect, label, xy, subLabel1, subLabel2);
+
+            var zw = new Vector2(value.z, value.w);
+            rect.y = rect.yMax + EditorGUIUtility.standardVerticalSpacing;
+            zw = SingleLineVector2Field(rect, TempContent(), zw, subLabel3, subLabel4);
+
+            return new Vector4(xy.x, xy.y, zw.x, zw.y);
         }
 
 
-        public static void SingleLineVector2Field(Rect rect, SerializedProperty property, GUIContent label, float aspectRatio)
+        public static Vector4Int TwoLinesVector4IntField(Rect rect, GUIContent label, Vector4Int value, string subLabel1 = "X", string subLabel2 = "Y", string subLabel3 = "Z", string subLabel4 = "W")
         {
-            property.vector2Value = SingleLineVector2Field(rect, property.vector2Value, label, aspectRatio);
+            var xy = new Vector2Int(value.x, value.y);
+            rect.height = EditorGUIUtility.singleLineHeight;
+            xy = SingleLineVector2IntField(rect, label, xy, subLabel1, subLabel2);
+
+            var zw = new Vector2Int(value.z, value.w);
+            rect.y = rect.yMax + EditorGUIUtility.standardVerticalSpacing;
+            zw = SingleLineVector2IntField(rect, TempContent(), zw, subLabel3, subLabel4);
+
+            return new Vector4Int(xy.x, xy.y, zw.x, zw.y);
         }
 
 
-        public static Vector2 SingleLineVector2FieldLayout(Vector2 value, GUIContent label)
+        public static Rect TwoLinesRectField(Rect rect, GUIContent label, Rect value)
         {
-            return SingleLineVector2Field(EditorGUILayout.GetControlRect(true, EditorGUIUtility.singleLineHeight), value, label);
+            var v4 = new Vector4(value.x, value.y, value.width, value.height);
+            v4 = TwoLinesVector4Field(rect, label, v4, "X", "Y", "W", "H");
+            return new Rect(v4.x, v4.y, v4.z, v4.w);
         }
 
 
-        public static void SingleLineVector2FieldLayout(SerializedProperty property, GUIContent label)
+        public static RectInt TwoLinesRectIntField(Rect rect, GUIContent label, RectInt value)
         {
-            property.vector2Value = SingleLineVector2FieldLayout(property.vector2Value, label);
+            var v4 = new Vector4Int(value.x, value.y, value.width, value.height);
+            v4 = TwoLinesVector4IntField(rect, label, v4, "X", "Y", "W", "H");
+            return new RectInt(v4.x, v4.y, v4.z, v4.w);
         }
 
 
@@ -533,6 +604,133 @@ namespace UnityExtensions.Editor
             }
 
             return menu;
+        }
+
+
+        public static bool IsArrayOrList(Type type)
+        {
+            return type.IsArray || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>));
+        }
+
+
+        public static Type GetArrayOrListElementType(Type type)
+        {
+            return type.IsArray ? type.GetElementType() : type.GetGenericArguments()[0];
+        }
+
+
+        /// <summary>
+        /// Supports [SerializeReference]
+        /// </summary>
+        /// <param name="root"> the unity object </param>
+        /// <param name="path"> "a.b.Array.data[3].c" </param>
+        /// <param name="parent"> 0-self, 1-parent, 2-grandparent, ... </param>
+        /// <returns></returns>
+        public static void GetSetSerializedPropertyRepresentedObject(bool set, object root, string path, ref object value, int parent = 0)
+        {
+            SubFieldID id = new SubFieldID(root, path);
+            if (set) _parentObjects.Clear();
+
+            if (_subFieldsDictionary.TryGetValue(id, out var subFields))
+            {
+                parent = subFields.Length - parent;
+
+                for (int i = 0; i < parent; i++)
+                {
+                    if (set) _parentObjects.Push(root);
+
+                    ref var subField = ref subFields[i];
+
+                    root = subField.fieldInfo.GetValue(root);
+                    if (subField.listIndex >= 0) root = ((IList)root)[subField.listIndex];
+
+                    var type = root?.GetType();
+                    if (type != subField.actualType)
+                    {
+                        subField.actualType = type;
+
+                        // Field actual type changed, need update all sub-fields info
+                        for (i++; i < parent; i++)
+                        {
+                            if (set) _parentObjects.Push(root);
+
+                            subField = ref subFields[i];
+                            subField.fieldInfo = type.GetInstanceField(subField.fieldInfo.Name);
+
+                            root = subField.fieldInfo.GetValue(root);
+                            if (subField.listIndex >= 0) root = ((IList)root)[subField.listIndex];
+
+                            subField.actualType = type = root?.GetType();
+                        }
+
+                        break;
+                    }
+                }
+
+                if (!set) value = root;
+            }
+            else
+            {
+                var names = path.Replace(".Array.data[", "[").Split('.');
+                subFields = new SubFieldInfo[names.Length];
+                var type = root.GetType();
+
+                parent = subFields.Length - parent;
+
+                for (int i = 0; i < subFields.Length; i++)
+                {
+                    if (set)
+                    {
+                        if (i < parent) _parentObjects.Push(root);
+                    }
+                    else
+                    {
+                        if (i == parent) value = root;
+                    }
+
+                    ref var subField = ref subFields[i];
+
+                    subField.listIndex = -1;
+                    var name = names[i];
+
+                    if (name[name.Length - 1] == ']')
+                    {
+                        int leftIndex = name.IndexOf('[');
+                        subField.listIndex = int.Parse(name.Substring(leftIndex + 1, name.Length - leftIndex - 2));
+                        name = name.Substring(0, leftIndex);
+                    }
+
+                    subField.fieldInfo = type.GetInstanceField(name);
+
+                    root = subField.fieldInfo.GetValue(root);
+                    if (subField.listIndex >= 0) root = ((IList)root)[subField.listIndex];
+
+                    subField.actualType = type = root?.GetType();
+                }
+
+                _subFieldsDictionary.Add(id, subFields);
+            }
+
+            if (set)
+            {
+                var fieldValue = value;
+                for (int i = parent - 1; i >= 0; i--)
+                {
+                    ref var subField = ref subFields[i];
+
+                    root = _parentObjects.Pop();
+                    if (subField.listIndex >= 0)
+                    {
+                        ((IList)subField.fieldInfo.GetValue(root))[subField.listIndex] = fieldValue;
+                    }
+                    else
+                    {
+                        subField.fieldInfo.SetValue(root, fieldValue);
+                    }
+
+                    fieldValue = root;
+                }
+            }
         }
 
     } // struct EditorGUIUtilities

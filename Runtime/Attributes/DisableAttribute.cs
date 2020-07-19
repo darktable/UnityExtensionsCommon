@@ -15,12 +15,27 @@ namespace UnityExtensions
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class DisableAttribute : PropertyAttribute
     {
+        public DisableAttribute(int indent = 0)
+        {
+#if UNITY_EDITOR
+            _indent = indent;
+            _mode = 0;
+#endif
+        }
+
+        /// <summary>
+        /// Use a value to enabled or disable field editing
+        /// </summary>
+        /// <param name="fieldOrProperty"> Name of a field or property of the same object. </param>
+        /// <param name="disableValue"> the value of the field or property to disable editing. </param>
+        /// <param name="indent"> Indent level of this field. </param>
         public DisableAttribute(string fieldOrProperty, bool disableValue, int indent = 0)
         {
 #if UNITY_EDITOR
             _name = fieldOrProperty;
             _value = disableValue;
             _indent = indent;
+            _mode = 3;
 #endif
         }
 
@@ -30,50 +45,74 @@ namespace UnityExtensions
         string _name;
         bool _value;
         int _indent;
+        int _mode; // -1:fieldOrPropertyError 0:default, 1:field, 2:property, 3:fieldOrProperty
         object _fieldOrProp;
 
         [CustomPropertyDrawer(typeof(DisableAttribute))]
         class DisableDrawer : BasePropertyDrawer<DisableAttribute>
         {
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+            void ValidateFieldOrPropertyInfo()
             {
-                if (attribute._fieldOrProp == null)
+                if (attribute._mode == 3)
                 {
-                    var field = property.serializedObject.targetObject.GetType().GetInstanceField(attribute._name);
+                    var field = fieldInfo.DeclaringType.GetInstanceField(attribute._name);
                     if (field?.FieldType == typeof(bool))
                     {
                         attribute._fieldOrProp = field;
+                        attribute._mode = 1;
                     }
                     else
                     {
-                        var prop = property.serializedObject.targetObject.GetType().GetInstanceProperty(attribute._name);
+                        var prop = fieldInfo.DeclaringType.GetInstanceProperty(attribute._name);
                         if (prop?.PropertyType == typeof(bool) && prop.CanRead)
                         {
                             attribute._fieldOrProp = prop;
+                            attribute._mode = 2;
                         }
+                        else attribute._mode = -1;
                     }
                 }
-
-                return attribute._fieldOrProp == null ? EditorGUIUtility.singleLineHeight : base.GetPropertyHeight(property, label);
             }
 
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+            {
+                ValidateFieldOrPropertyInfo();
+
+                return attribute._mode < 0 ? EditorGUIUtility.singleLineHeight : base.GetPropertyHeight(property, label);
+            }
 
             public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                object result = (attribute._fieldOrProp as FieldInfo)?.GetValue(property.serializedObject.targetObject);
-                if (result == null) result = (attribute._fieldOrProp as PropertyInfo)?.GetValue(property.serializedObject.targetObject, null);
-
-                if (result != null)
+                if (attribute._mode < 0)
                 {
-                    using (DisabledScope.New((bool)result == attribute._value))
+                    EditorGUI.LabelField(position, label.text, "Can not find a valid field or property");
+                    return;
+                }
+
+                bool disabled = true;
+
+                if (attribute._mode > 0)
+                {
+                    foreach (var target in property.serializedObject.targetObjects)
                     {
-                        using (IndentLevelScope.New(attribute._indent))
-                            base.OnGUI(position, property, label);
+                        var parent = property.GetParentObject(target);
+                        if (attribute._mode == 1)
+                        {
+                            disabled = (bool)((FieldInfo)attribute._fieldOrProp).GetValue(parent) == attribute._value;
+                        }
+                        else
+                        {
+                            disabled = (bool)((PropertyInfo)attribute._fieldOrProp).GetValue(parent, null) == attribute._value;
+                        }
+
+                        if (disabled) break;
                     }
                 }
-                else
+
+                using (DisabledScope.New(disabled))
                 {
-                    EditorGUI.LabelField(position, label.text, "Field or Property has error!");
+                    using (IndentLevelScope.New(attribute._indent))
+                        base.OnGUI(position, property, label);
                 }
             }
 

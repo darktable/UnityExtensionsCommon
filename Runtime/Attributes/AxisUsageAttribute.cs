@@ -49,14 +49,12 @@ namespace UnityExtensions
                 new string[] { "XY", "YZ", "XZ" },
             };
 
-
             static Axis[][] _axisValues =
             {
                 new Axis[] { Axis.PositiveX, Axis.NegativeX, Axis.PositiveY, Axis.NegativeY, Axis.PositiveZ, Axis.NegativeZ },
                 new Axis[] { Axis.X, Axis.Y, Axis.Z },
                 new Axis[] { Axis.XY, Axis.YZ, Axis.XZ },
             };
-
 
             int AxisToIndex(Axis axis)
             {
@@ -114,31 +112,39 @@ namespace UnityExtensions
 
                 if ((int)attribute._usage % 2 == 0)
                 {
-                    int index = AxisToIndex((Axis)property.intValue);
-                    index = GUI.Toolbar(position, index, _axisNames[type], EditorStyles.miniButton);
-
-                    property.intValue = index < 0 ? 0 : (int)_axisValues[type][index];
+                    int index = property.hasMultipleDifferentValues ? -1 : AxisToIndex((Axis)property.intValue);
+                    using (var scope = ChangeCheckScope.New())
+                    {
+                        index = GUI.Toolbar(position, index, _axisNames[type], EditorStyles.miniButton);
+                        if (scope.changed) property.intValue = index < 0 ? 0 : (int)_axisValues[type][index];
+                    }
                 }
                 else
                 {
                     position.width = position.width / _axisNames[type].Length - 2;
-                    int mask = property.intValue;
+                    int mask = property.hasMultipleDifferentValues ? 0 : property.intValue;
 
-                    for (int i = 0; i < _axisNames[type].Length; i++)
+                    using (var scope = ChangeCheckScope.New())
                     {
-                        int item = (int)_axisValues[type][i];
-                        if (GUI.Toggle(position, (mask & item) == item, _axisNames[type][i], EditorStyles.miniButton))
+                        for (int i = 0; i < _axisNames[type].Length; i++)
                         {
-                            mask |= item;
-                        }
-                        else
-                        {
-                            mask &= ~item;
-                        }
-                        position.x = position.xMax + 2;
-                    }
+                            int item = (int)_axisValues[type][i];
 
-                    property.intValue = mask;
+                            using (var scope2 = ChangeCheckScope.New())
+                            {
+                                bool toggle = GUI.Toggle(position, (mask & item) == item, _axisNames[type][i], EditorStyles.miniButton);
+                                if (scope2.changed)
+                                {
+                                    if (toggle) mask |= item;
+                                    else mask &= ~item;
+                                }
+                            }
+
+                            position.x = position.xMax + 2;
+                        }
+
+                        if (scope.changed) property.intValue = mask;
+                    }
                 }
             }
 

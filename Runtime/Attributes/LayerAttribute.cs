@@ -23,9 +23,16 @@ namespace UnityExtensions
             {
                 if (property.propertyType == SerializedPropertyType.Integer)
                 {
-                    property.intValue = EditorGUI.LayerField(position, label, property.intValue);
+                    using (var scope = ChangeCheckScope.New())
+                    {
+                        using (MixedValueScope.New(property.hasMultipleDifferentValues))
+                        {
+                            int value = EditorGUI.LayerField(position, label, property.intValue);
+                            if (scope.changed) property.intValue = value;
+                        }
+                    }
                 }
-                else EditorGUI.LabelField(position, label, "Use LayerAttribute with int.");
+                else EditorGUI.LabelField(position, label.text, "LayerAttribute can only be used with int.");
             }
 
         } // class LayerDrawer

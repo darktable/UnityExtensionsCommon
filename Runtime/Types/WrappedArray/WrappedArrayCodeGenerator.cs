@@ -1,9 +1,12 @@
-﻿#if UNITY_EDITOR
+﻿using UnityEngine;
+
+#if UNITY_EDITOR
+using System;
+using System.IO;
 using System.Reflection;
-using UnityEngine;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditorInternal;
-using System.IO;
 #endif
 
 namespace UnityExtensions
@@ -12,9 +15,13 @@ namespace UnityExtensions
     {
     }
 
+    public interface IWrappedPolymorphicArray : IWrappedArray
+    {
+    }
+
     public static class WrappedArrayCodeGenerator
     {
-        public static string Generate(string[] usingItems, string nameSpace, string elementTypeName, string wrappedTypeNamePrefix)
+        public static string Generate(string[] usingItems, string nameSpace, string elementTypeName, string wrappedTypeNamePrefix, bool polymorphic)
         {
             string usings = "";
             if (usingItems != null)
@@ -28,20 +35,23 @@ namespace UnityExtensions
 
             var T = wrappedTypeNamePrefix;
             var t = elementTypeName;
+            var attr = polymorphic ? $"[{nameof(SerializeReference)}] " : "";
+            var parent = polymorphic ? nameof(IWrappedPolymorphicArray) : nameof(IWrappedArray);
 
             return
 //-----------------------------------------------------------------------------
 $@"
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityExtensions;{usings}
 
 namespace {nameSpace}
 {{
     [Serializable]
-    public struct {T}Array : IWrappedArray, IEquatable<{T}Array>, IEquatable<{t}[]>
+    public struct {T}Array : {parent}, IEquatable<{T}Array>, IEquatable<{t}[]>
     {{
-        public {t}[] data;
+        {attr}public {t}[] data;
         public int length => data.Length;
         public bool isNullOrEmpty => data == null || data.Length == 0;
         public ref {t} this[int index] => ref data[index];
@@ -70,9 +80,9 @@ namespace {nameSpace}
     }}
 
     [Serializable]
-    public struct {T}List : IWrappedArray, IEquatable<{T}List>, IEquatable<List<{t}>>
+    public struct {T}List : {parent}, IEquatable<{T}List>, IEquatable<List<{t}>>
     {{
-        public List<{t}> data;
+        {attr}public List<{t}> data;
         public int count => data.Count;
         public bool isNullOrEmpty => data == null || data.Count == 0;
         public {t} this[int index] {{ get => data[index]; set => data[index] = value; }}
@@ -106,16 +116,19 @@ namespace {nameSpace}
             [SerializeField] string _nameSpace = "UnityExtensions";
             [SerializeField] string _elementTypeName = "UnityObject";
             [SerializeField] string _wrappedTypeNamePrefix = "Object";
+            [SerializeField] bool _polymorphic = false;
 
             SerializedObject _serializedObject;
             SerializedProperty _nameSpaceProp;
             SerializedProperty _usingItemsProp;
             SerializedProperty _elementTypeNameProp;
             SerializedProperty _wrappedTypeNamePrefixProp;
+            SerializedProperty _polymorphicProp;
+
             string _generatedCode;
             Vector2 _scrollPosition;
 
-            [MenuItem("Assets/Create/Unity Extensions/Wrapped Array Code...")]
+            [MenuItem("Assets/Create/Unity Extensions/Wrapped Array Script...")]
             public static void ShowWindow()
             {
                 var window = GetWindow<WrappedArrayCodeGeneratorWindow>("Wrapped Array Code Generator");
@@ -130,6 +143,7 @@ namespace {nameSpace}
                 _nameSpaceProp = _serializedObject.FindProperty(nameof(_nameSpace));
                 _elementTypeNameProp = _serializedObject.FindProperty(nameof(_elementTypeName));
                 _wrappedTypeNamePrefixProp = _serializedObject.FindProperty(nameof(_wrappedTypeNamePrefix));
+                _polymorphicProp = _serializedObject.FindProperty(nameof(_polymorphic));
             }
 
             private void OnValidate()
@@ -148,6 +162,7 @@ namespace {nameSpace}
                         EditorGUILayout.PropertyField(_nameSpaceProp);
                         EditorGUILayout.PropertyField(_elementTypeNameProp);
                         EditorGUILayout.PropertyField(_wrappedTypeNamePrefixProp);
+                        EditorGUILayout.PropertyField(_polymorphicProp);
                         _serializedObject.ApplyModifiedProperties();
                     }
 
@@ -157,7 +172,7 @@ namespace {nameSpace}
                     {
                         if (GUI.Button(rect, "Generate Code"))
                         {
-                            _generatedCode = WrappedArrayCodeGenerator.Generate(_usingItems, _nameSpace, _elementTypeName, _wrappedTypeNamePrefix);
+                            _generatedCode = WrappedArrayCodeGenerator.Generate(_usingItems, _nameSpace, _elementTypeName, _wrappedTypeNamePrefix, _polymorphic);
                         }
                     }
 
@@ -187,42 +202,55 @@ namespace {nameSpace}
         [CustomPropertyDrawer(typeof(IWrappedArray), true)]
         public class WrappedArrayDrawer : PropertyDrawer
         {
-            ReorderableList _list;
-            static FieldInfo _serializedObjectInfo;
+            static Dictionary<SubFieldID, (ReorderableList list, SerializedObject obj)> _lists
+                = new Dictionary<SubFieldID, (ReorderableList, SerializedObject)>();
 
-            void ValidateList(SerializedProperty property)
+            protected const string wrappedArrayName = "data";
+
+            static FieldInfo _listSerializedObjectInfo;
+
+            static ReorderableList GetList(SerializedProperty wrappedProperty, SerializedProperty arrayProperty)
             {
-                if (_list == null)
+                var id = new SubFieldID(wrappedProperty);
+                if (!_lists.TryGetValue(id, out var data))
                 {
-                    _list = new ReorderableList(property.serializedObject, property.FindPropertyRelative("data"), true, false, false, false);
-                    _list.elementHeightCallback = ElementHeight;
-                    _list.drawElementBackgroundCallback = DrawElementBackground;
-                    _list.drawElementCallback = DrawElement;
-                    _list.showDefaultBackground = false;
-                    _list.headerHeight = 0;
-                    _list.footerHeight = 0;
+                    data.obj = wrappedProperty.serializedObject;
+                    data.list = new ReorderableList(data.obj, arrayProperty, true, false, false, false);
+                    data.list.elementHeightCallback = index => GetElementHeight(data.list, index);
+                    data.list.drawElementBackgroundCallback = DrawElementBackground;
+                    data.list.drawElementCallback = (rect, index, active, focus) => DrawElement(data.list, rect, index, active, focus);
+                    data.list.showDefaultBackground = false;
+                    data.list.headerHeight = 0;
+                    data.list.footerHeight = 0;
 
+                    _lists[id] = data;
                 }
                 else
                 {
-                    if (_serializedObjectInfo == null)
-                        _serializedObjectInfo = typeof(ReorderableList).GetField("m_SerializedObject", BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (wrappedProperty.serializedObject != data.obj)
+                    {
+                        data.obj = wrappedProperty.serializedObject;
 
-                    _serializedObjectInfo.SetValue(_list, property.serializedObject);
-                    _list.serializedProperty = property.FindPropertyRelative("data");
+                        if (_listSerializedObjectInfo == null)
+                            _listSerializedObjectInfo = typeof(ReorderableList).GetInstanceField("m_SerializedObject");
+
+                        _listSerializedObjectInfo.SetValue(data.list, data.obj);
+                        data.list.index = -1;
+
+                        _lists[id] = data;
+                    }
+                    data.list.serializedProperty = arrayProperty;
                 }
+                return data.list;
             }
 
-            float ElementHeight(int index)
+            static float GetElementHeight(ReorderableList list, int index)
             {
-                using (WideModeScope.New(true))
-                {
-                    var property = _list.serializedProperty.GetArrayElementAtIndex(index);
-                    return EditorGUI.GetPropertyHeight(property, property.isExpanded) + 2;
-                }
+                var property = list.serializedProperty.GetArrayElementAtIndex(index);
+                return EditorGUI.GetPropertyHeight(property, true) + 2;
             }
 
-            void DrawElementBackground(Rect rect, int index, bool isActive, bool isFocused)
+            static void DrawElementBackground(Rect rect, int index, bool isActive, bool isFocused)
             {
                 if (isFocused)
                 {
@@ -236,24 +264,27 @@ namespace {nameSpace}
                 }
             }
 
-            void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
+            static void DrawElement(ReorderableList list, Rect rect, int index, bool isActive, bool isFocused)
             {
-                using (WideModeScope.New(true))
-                {
-                    var property = _list.serializedProperty.GetArrayElementAtIndex(index);
-                    if (!property.hasVisibleChildren) rect.y += 1f;
-                    rect.height -= 2f;
+                var property = list.serializedProperty.GetArrayElementAtIndex(index);
+                if (!property.hasVisibleChildren) rect.y += 1f;
+                rect.height -= 2f;
 
-                    if (property.hasVisibleChildren)
+                if (property.hasVisibleChildren)
+                {
+                    rect.xMin += 12;
+                    using (LabelWidthScope.New(-12, true))
                     {
-                        rect.xMin += 12;
-                        using (LabelWidthScope.New(-12, true))
-                        {
-                            EditorGUI.PropertyField(rect, property, property.isExpanded);
-                        }
+                        EditorGUI.PropertyField(rect, property, true);
                     }
-                    else EditorGUI.PropertyField(rect, property, property.isExpanded);
                 }
+                else EditorGUI.PropertyField(rect, property, true);
+            }
+
+            protected virtual bool showAddDropDown => false;
+
+            protected virtual void SetAddDropDownMenu(GenericMenu menu, ReorderableList list)
+            {
             }
 
             public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -261,59 +292,150 @@ namespace {nameSpace}
                 if (!property.isExpanded)
                     return EditorGUIUtility.singleLineHeight;
 
-                ValidateList(property);
-                return (_list.count > 0 ? _list.GetHeight() : 0) + (EditorGUIUtility.singleLineHeight + 2f) * 2;
+                var arrayProperty = property.FindPropertyRelative(wrappedArrayName);
+                var list = GetList(property, arrayProperty);
+                return (list.count > 0 ? list.GetHeight() : 0) + (EditorGUIUtility.singleLineHeight + 2) * 2;
             }
 
             public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                var dataProperty = property.FindPropertyRelative("data");
+                var arrayProperty = property.FindPropertyRelative(wrappedArrayName);
 
                 var headRect = position;
                 headRect.height = EditorGUIUtility.singleLineHeight;
                 EditorGUI.PropertyField(headRect, property, label, false);
 
                 headRect.xMin += EditorGUIUtility.labelWidth + 2;
-                EditorGUI.LabelField(headRect, dataProperty.hasMultipleDifferentValues ? "-" : dataProperty.arraySize.ToString());
+                if (!property.hasMultipleDifferentValues)
+                    EditorGUI.LabelField(headRect, arrayProperty.arraySize.ToString());
 
                 if (property.isExpanded)
                 {
-                    if (_list != null && _list.count > 0)
+                    var list = GetList(property, arrayProperty);
+
+                    if (list.count > 0)
                     {
                         var listRect = position;
                         listRect.yMin = headRect.yMax + 2;
                         listRect.yMax = position.yMax - EditorGUIUtility.singleLineHeight - 2;
-                        _list.DoList(listRect);
+                        list.DoList(listRect);
                     }
 
-                    ValidateList(property);
-
-                    position.yMin = position.yMax - EditorGUIUtility.singleLineHeight - 4;
-                    position.yMax -= 4;
+                    position.yMax -= 3;
+                    position.yMin = position.yMax - EditorGUIUtility.singleLineHeight;
                     position.xMin += EditorGUIUtility.labelWidth + EditorGUIUtility.singleLineHeight + 4;
-                    position.width = (position.width - 6) / 2;
-                    if (GUI.Button(position, "Add", EditorStyles.miniButtonLeft))
+                    position.xMax -= 6;
+
+                    position.width = position.width / 2;
+
+                    if (GUI.Button(position, showAddDropDown ? "Add..." : "Add", EditorStyles.miniButtonLeft))
                     {
-                        if (_list.index < 0)
+                        if (showAddDropDown)
                         {
-                            dataProperty.arraySize++;
-                            _list.index = dataProperty.arraySize - 1;
+                            GenericMenu menu = new GenericMenu();
+                            SetAddDropDownMenu(menu, list);
+                            menu.DropDown(position);
                         }
                         else
                         {
-                            dataProperty.InsertArrayElementAtIndex(_list.index);
-                            _list.index++;
+                            if (list.index < 0)
+                            {
+                                arrayProperty.arraySize++;
+                                list.index = arrayProperty.arraySize - 1;
+                            }
+                            else
+                            {
+                                arrayProperty.InsertArrayElementAtIndex(list.index);
+                                list.index++;
+                            }
                         }
                     }
 
-                    using (DisabledScope.New(_list.index < 0))
+                    position.x = position.xMax;
+
+                    using (DisabledScope.New(list.index < 0))
                     {
-                        position.x = position.xMax;
                         if (GUI.Button(position, "Remove", EditorStyles.miniButtonRight))
                         {
-                            dataProperty.DeleteArrayElementAtIndex(_list.index);
-                            if (_list.index > 0 || dataProperty.arraySize == 0) _list.index--;
+                            arrayProperty.DeleteArrayElementAtIndex(list.index);
+                            if (list.index > 0 || arrayProperty.arraySize == 0) list.index--;
                         }
+                    }
+                }
+            }
+        }
+
+
+        [CustomPropertyDrawer(typeof(IWrappedPolymorphicArray), true)]
+        public class WrappedPolymorphicArrayDrawer : WrappedArrayDrawer
+        {
+            static Dictionary<Type, List<Type>> _availableTypes = new Dictionary<Type, List<Type>>();
+
+            static bool IsTypeAvailable(Type type)
+            {
+                var constructorFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+                return type.IsClass
+                    && !type.IsAbstract
+                    && !type.IsGenericType
+                    && type.GetCustomAttribute<SerializableAttribute>(false) != null
+                    && type.GetConstructor(constructorFlags, null, Type.EmptyTypes, null) != null;
+            }
+
+            List<Type> GetAvailableTypes()
+            {
+                var type = fieldInfo.FieldType;
+
+                if (!_availableTypes.TryGetValue(type, out var list))
+                {
+                    var elementType = type.GetInstanceField(wrappedArrayName).FieldType;
+                    elementType = EditorGUIUtilities.GetArrayOrListElementType(elementType);
+
+                    list = new List<Type>();
+                    if (IsTypeAvailable(elementType)) list.Add(elementType);
+
+                    foreach (var t in TypeCache.GetTypesDerivedFrom(elementType))
+                    {
+                        if (IsTypeAvailable(t)) list.Add(t);
+                    }
+
+                    _availableTypes.Add(type, list);
+                }
+                return list;
+            }
+
+            protected override bool showAddDropDown => true;
+
+            protected override void SetAddDropDownMenu(GenericMenu menu, ReorderableList list)
+            {
+                var types = GetAvailableTypes();
+
+                if (types.Count == 0)
+                {
+                    menu.AddDisabledItem(new GUIContent("No Available Type"));
+                }
+                else
+                {
+                    foreach (var t in types)
+                    {
+                        menu.AddItem(new GUIContent(t.Name), false, type =>
+                        {
+                            var obj = Activator.CreateInstance((Type)type);
+                            if (list.index < 0)
+                            {
+                                list.serializedProperty.arraySize++;
+                                list.index = list.serializedProperty.arraySize - 1;
+                            }
+                            else
+                            {
+                                list.serializedProperty.InsertArrayElementAtIndex(list.index);
+                                list.index++;
+                            }
+
+                            list.serializedProperty.GetArrayElementAtIndex(list.index).managedReferenceValue = obj;
+                            list.serializedProperty.serializedObject.ApplyModifiedProperties();
+                            list.serializedProperty.serializedObject.Update();
+                        }, t);
                     }
                 }
             }

@@ -1,14 +1,13 @@
 ﻿#if UNITY_EDITOR
 
 using UnityEditor;
-using UnityEngine;
 
 namespace UnityExtensions.Editor
 {
     /// <summary>
     /// Utilities for editor.
     /// </summary>
-    public struct EditorUtilities
+    public static class EditorUtilities
     {
         static float _unscaledDeltaTime;
         static double _lastTimeSinceStartup = -0.01;

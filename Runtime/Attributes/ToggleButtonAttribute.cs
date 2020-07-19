@@ -14,7 +14,7 @@ namespace UnityExtensions
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class ToggleButtonAttribute : PropertyAttribute
     {
-        public ToggleButtonAttribute(string text, bool indent = true)
+        public ToggleButtonAttribute(string text = null, bool indent = true)
         {
 #if UNITY_EDITOR
             _label = text;
@@ -45,19 +45,25 @@ namespace UnityExtensions
         {
             public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                label.text = attribute._label;
+                if (attribute._label != null) label.text = attribute._label;
+
                 if (attribute._trueText != null && attribute._falseText != null)
                 {
                     position = EditorGUI.PrefixLabel(position, label);
-                    if (GUI.Button(position, property.boolValue ? attribute._trueText : attribute._falseText, EditorStyles.miniButton))
+                    var text = property.hasMultipleDifferentValues ? "--" : (property.boolValue ? attribute._trueText : attribute._falseText);
+                    if (GUI.Button(position, text, EditorStyles.miniButton))
                     {
                         property.boolValue = !property.boolValue;
                     }
                 }
                 else
                 {
-                    if (attribute._indent) position.xMin += EditorGUIUtility.labelWidth;
-                    property.boolValue = GUI.Toggle(position, property.boolValue, label, EditorStyles.miniButton);
+                    if (attribute._indent) position.xMin += EditorGUIUtility.labelWidth + 2;
+                    using (var scope = ChangeCheckScope.New())
+                    {
+                        bool value = GUI.Toggle(position, property.boolValue, property.hasMultipleDifferentValues ? "--" : label.text, EditorStyles.miniButton);
+                        if (scope.changed) property.boolValue = value;
+                    }
                 }
             }
 

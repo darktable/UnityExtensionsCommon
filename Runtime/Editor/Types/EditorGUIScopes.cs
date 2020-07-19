@@ -42,6 +42,31 @@ namespace UnityExtensions.Editor
     }
 
 
+    public struct MixedValueScope : IDisposable
+    {
+        bool _orginal;
+
+        public static MixedValueScope New(bool value)
+        {
+            var scope = new MixedValueScope { _orginal = EditorGUI.showMixedValue };
+            EditorGUI.showMixedValue = value;
+            return scope;
+        }
+
+        public static MixedValueScope New(SerializedProperty property)
+        {
+            var scope = new MixedValueScope { _orginal = EditorGUI.showMixedValue };
+            EditorGUI.showMixedValue = property.hasMultipleDifferentValues;
+            return scope;
+        }
+
+        void IDisposable.Dispose()
+        {
+            EditorGUI.showMixedValue = _orginal;
+        }
+    }
+
+
     public struct IndentLevelScope : IDisposable
     {
         int _indent;
@@ -152,6 +177,7 @@ namespace UnityExtensions.Editor
         bool _end;
         bool _changed;
         UnityEngine.Object _undoRecordObject;
+        UnityEngine.Object[] _undoRecordObjects;
 
         public bool changed
         {
@@ -161,16 +187,29 @@ namespace UnityExtensions.Editor
                 {
                     _end = true;
                     _changed = EditorGUI.EndChangeCheck();
-                    if (_changed && _undoRecordObject)
+                    if (_changed)
                     {
-                        Undo.RecordObject(_undoRecordObject, _undoRecordObject.name);
+                        if (_undoRecordObject)
+                            Undo.RecordObject(_undoRecordObject, _undoRecordObject.name);
+                        if (_undoRecordObjects != null)
+                            Undo.RecordObjects(_undoRecordObjects, "< Multiple >");
                     }
                 }
                 return _changed;
             }
         }
 
-        public static ChangeCheckScope New(UnityEngine.Object undoRecordObject = null)
+        public static ChangeCheckScope New()
+        {
+            EditorGUI.BeginChangeCheck();
+            return new ChangeCheckScope
+            {
+                _end = false,
+                _changed = false,
+            };
+        }
+
+        public static ChangeCheckScope New(UnityEngine.Object undoRecordObject)
         {
             EditorGUI.BeginChangeCheck();
             return new ChangeCheckScope
@@ -181,12 +220,25 @@ namespace UnityExtensions.Editor
             };
         }
 
+        public static ChangeCheckScope New(params UnityEngine.Object[] undoRecordObjects)
+        {
+            EditorGUI.BeginChangeCheck();
+            return new ChangeCheckScope
+            {
+                _end = false,
+                _changed = false,
+                _undoRecordObjects = undoRecordObjects
+            };
+        }
+
         void IDisposable.Dispose()
         {
             if (!_end)
             {
                 _end = true;
                 _changed = EditorGUI.EndChangeCheck();
+                _undoRecordObject = null;
+                _undoRecordObjects = null;
             }
         }
     }
