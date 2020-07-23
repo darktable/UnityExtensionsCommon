@@ -235,6 +235,48 @@ namespace UnityExtensions
 
 
         /// <summary>
+        /// Get the closest point to the specified point on a line.
+        /// </summary>
+        public static Vector2 ClosestPointOnLine(Vector2 point, Vector2 origin, Vector2 direction)
+        {
+            float t = direction.sqrMagnitude;
+            if (t == 0f) return origin;
+
+            return origin + direction * (Vector2.Dot(point - origin, direction) / t);
+        }
+
+
+        /// <summary>
+        /// Get the closest point to the specified point on a line.
+        /// </summary>
+        public static Vector3 ClosestPointOnLine(Vector3 point, Vector3 origin, Vector3 direction)
+        {
+            float t = direction.sqrMagnitude;
+            if (t == 0f) return origin;
+
+            return origin + direction * (Vector3.Dot(point - origin, direction) / t);
+        }
+
+
+        public static float ClosestPointOnRayFactor(Vector2 point, Vector2 origin, Vector2 direction)
+        {
+            float t = direction.sqrMagnitude;
+            if (t == 0f) return 0f;
+
+            return Mathf.Max(Vector2.Dot(point - origin, direction) / t, 0f);
+        }
+
+
+        /// <summary>
+        /// Get the closest point to the specified point on a ray.
+        /// </summary>
+        public static Vector2 ClosestPointOnRay(Vector2 point, Vector2 origin, Vector2 direction)
+        {
+            return origin + direction * ClosestPointOnRayFactor(point, origin, direction);
+        }
+
+
+        /// <summary>
         /// Get the closest point to the specified point on a ray. Returned value is 't' in "origin + direction * t".
         /// </summary>
         public static float ClosestPointOnRayFactor(Vector3 point, Vector3 origin, Vector3 direction)
@@ -299,7 +341,6 @@ namespace UnityExtensions
         {
             return start + (end - start) * ClosestPointOnSegmentFactor(point, start, end);
         }
-
 
 
         /// <summary>
