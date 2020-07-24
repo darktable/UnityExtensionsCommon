@@ -13,7 +13,7 @@ namespace UnityExtensions.Editor
 
         public int targetCount => targets.Length;
 
-        public bool hasMultipleTargets => targets.Length > 0;
+        public bool hasMultipleTargets => targets.Length > 1;
 
     } // class BaseEditor<T>
 
