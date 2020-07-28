@@ -99,11 +99,6 @@ namespace UnityExtensions
         }
 
         /// <summary>
-        /// MaterialPropertyBlock pool
-        /// </summary>
-        public static readonly ObjectPool<MaterialPropertyBlock> materialPropertyBlockPool = new ObjectPool<MaterialPropertyBlock>();
-
-        /// <summary>
         /// FixedUpdate times
         /// </summary>
         public static int fixedFrameCount { get; private set; }

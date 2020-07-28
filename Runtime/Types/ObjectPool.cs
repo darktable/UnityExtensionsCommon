@@ -94,6 +94,14 @@ namespace UnityExtensions
             : base(initialQuantity)
                 => this.arrayLength = arrayLength;
 
-    } // class ObjectPool
+    } // class ArrayPool
+
+
+    public sealed class PoolSingleton<T> : ObjectPool<T> where T : class, new()
+    {
+        public static readonly PoolSingleton<T> instance = new PoolSingleton<T>();
+
+        private PoolSingleton() : base() { }
+    }
 
 } // namespace UnityExtensions
