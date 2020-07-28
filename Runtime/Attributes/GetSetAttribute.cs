@@ -35,7 +35,7 @@ namespace UnityExtensions
         GradientHDRFlag = 1 << 1,
 
         ObjectSceneOnly = 1,
-        ObjectAssetOnly = 2,
+        ObjectAssetsOnly = 2,
     }
 
 
@@ -59,8 +59,8 @@ namespace UnityExtensions
 
     /// <summary>
     /// Use a property instead of field.
-    ///     The property must belong to the same object;
-    ///     The property must can read;
+    ///     The property should belong to the same object;
+    ///     The property should can read at least;
     ///     The property can only change the fields which serialized in the current Unity Object.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
@@ -134,13 +134,16 @@ namespace UnityExtensions
                 {
                     using (var scope = ChangeCheckScope.New())
                     {
-                        if (propertyValue is ICustomDrawer drawer)
+                        using (MixedValueScope.New(property))
                         {
-                            property.isExpanded = drawer.OnGUI(position, property.isExpanded, label, property.serializedObject.targetObjects);
-                        }
-                        else
-                        {
-                            property.isExpanded = OnBuiltInGUI(ref propertyValue, position, property.isExpanded, label, property.serializedObject.targetObjects);
+                            if (propertyValue is ICustomDrawer drawer)
+                            {
+                                property.isExpanded = drawer.OnGUI(position, property.isExpanded, label, property.serializedObject.targetObjects);
+                            }
+                            else
+                            {
+                                property.isExpanded = OnBuiltInGUI(ref propertyValue, position, property.isExpanded, label, property.serializedObject.targetObjects);
+                            }
                         }
 
                         if (scope.changed)
@@ -199,7 +202,7 @@ namespace UnityExtensions
                     if (typeof(UnityObject).IsAssignableFrom(attribute._propertyInfo.PropertyType))
                     {
                         bool allowScene = false;
-                        if (attribute._mode != GetSetMode.ObjectAssetOnly)
+                        if (attribute._mode != GetSetMode.ObjectAssetsOnly)
                         {
                             allowScene = !EditorUtility.IsPersistent(objects[0]);
                         }
@@ -212,7 +215,7 @@ namespace UnityExtensions
                             if (attribute._mode != GetSetMode.ObjectSceneOnly || !EditorUtility.IsPersistent(value))
                                 propertyValue = value;
                             else
-                                EditorUtility.DisplayDialog("Unacceptable Target", "You can not select a target which is outside scenes.", "OK");
+                                EditorUtility.DisplayDialog("Unacceptable Object", "You can not select an object which is outside the scene.", "OK");
                         }
                     }
                     else
