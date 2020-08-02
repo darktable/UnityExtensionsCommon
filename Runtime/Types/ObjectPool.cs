@@ -104,4 +104,67 @@ namespace UnityExtensions
         private PoolSingleton() : base() { }
     }
 
+    public sealed class Array1PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array1PoolSingleton<T> instance = new Array1PoolSingleton<T>();
+
+        private Array1PoolSingleton() : base(1) { }
+    }
+
+    public sealed class Array4PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array4PoolSingleton<T> instance = new Array4PoolSingleton<T>();
+
+        private Array4PoolSingleton() : base(4) { }
+    }
+
+    public sealed class Array16PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array16PoolSingleton<T> instance = new Array16PoolSingleton<T>();
+
+        private Array16PoolSingleton() : base(16) { }
+    }
+
+    public sealed class Array32PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array32PoolSingleton<T> instance = new Array32PoolSingleton<T>();
+
+        private Array32PoolSingleton() : base(32) { }
+    }
+
+    public sealed class Array64PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array64PoolSingleton<T> instance = new Array64PoolSingleton<T>();
+
+        private Array64PoolSingleton() : base(64) { }
+    }
+
+    public sealed class Array128PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array128PoolSingleton<T> instance = new Array128PoolSingleton<T>();
+
+        private Array128PoolSingleton() : base(128) { }
+    }
+
+    public sealed class Array256PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array256PoolSingleton<T> instance = new Array256PoolSingleton<T>();
+
+        private Array256PoolSingleton() : base(256) { }
+    }
+
+    public sealed class Array512PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array512PoolSingleton<T> instance = new Array512PoolSingleton<T>();
+
+        private Array512PoolSingleton() : base(512) { }
+    }
+
+    public sealed class Array1024PoolSingleton<T> : ArrayPool<T>
+    {
+        public static readonly Array1024PoolSingleton<T> instance = new Array1024PoolSingleton<T>();
+
+        private Array1024PoolSingleton() : base(1024) { }
+    }
+
 } // namespace UnityExtensions
