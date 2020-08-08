@@ -37,6 +37,11 @@ namespace UnityExtensions
             }
         }
 
+        public float Lerp(float factor)
+        {
+            return min + (max - min) * factor;
+        }
+
         public void SortMinMax()
         {
             if (min > max)
