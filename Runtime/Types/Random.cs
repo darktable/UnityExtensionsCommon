@@ -38,10 +38,18 @@ namespace UnityExtensions
         public double Next01()
         {
             Next();
+
             //
             // Value range of seed is [0, 2147483645] now
             //
-            return seed / 2147483646.0;
+
+            uint value = (uint)(seed / 2147483646.0 * 1073741824.0);
+
+            //value = ((value & 0xAAAA_AAAA) >> 1) | ((value & 0x5555_5555) << 1);
+
+            value = ((value & 0x3FFF_8000) >> 15) | ((value & 0x0000_7FFF) << 15);
+
+            return value / 1073741824.0;
         }
 
 
