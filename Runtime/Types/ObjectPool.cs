@@ -14,12 +14,6 @@ namespace UnityExtensions
             _pool = objectPool;
         }
 
-        public TempObject(T item)
-        {
-            this.item = item;
-            _pool = null;
-        }
-
         public static implicit operator T(TempObject<T> temp) => temp.item;
 
         public void Dispose()
@@ -28,8 +22,8 @@ namespace UnityExtensions
             {
                 _pool.Despawn(item);
                 _pool = null;
+                item = null;
             }
-            item = null;
         }
     }
 
