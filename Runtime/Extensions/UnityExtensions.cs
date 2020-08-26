@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -48,6 +49,39 @@ namespace UnityExtensions
         public static RectTransform rectTransform(this GameObject target)
         {
             return target.transform as RectTransform;
+        }
+
+
+        public static string GetFullName(this Transform transform)
+        {
+            string result;
+            using (var builder = PoolSingleton<StringBuilder>.instance.GetTemp())
+            {
+                builder.item.Clear();
+
+                builder.item.Append(transform.gameObject.name);
+
+                while (transform.parent)
+                {
+                    transform = transform.parent;
+                    builder.item.Insert(0, '/');
+                    builder.item.Insert(0, transform.gameObject.name);
+                }
+
+                builder.item.Insert(0, '/');
+                builder.item.Insert(0, transform.gameObject.scene.name);
+
+                result = builder.item.ToString();
+
+                builder.item.Clear();
+            }
+            return result;
+        }
+
+
+        public static string GetFullName(this GameObject gameObject)
+        {
+            return gameObject.transform.GetFullName();
         }
 
 
