@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace UnityExtensions
@@ -159,27 +158,6 @@ namespace UnityExtensions
         void IDisposable.Dispose()
         {
             GUI.EndScrollView();
-        }
-    }
-
-
-    public struct EditorGUILayoutScrollViewScope : IDisposable
-    {
-        public static EditorGUILayoutScrollViewScope New(ref Vector2 scrollPosition, params GUILayoutOption[] options)
-        {
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, options);
-            return new EditorGUILayoutScrollViewScope();
-        }
-
-        public static EditorGUILayoutScrollViewScope New(ref Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, params GUILayoutOption[] options)
-        {
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, alwaysShowHorizontal, alwaysShowVertical, options);
-            return new EditorGUILayoutScrollViewScope();
-        }
-
-        void IDisposable.Dispose()
-        {
-            EditorGUILayout.EndScrollView();
         }
     }
 

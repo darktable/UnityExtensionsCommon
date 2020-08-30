@@ -312,6 +312,27 @@ namespace UnityExtensions.Editor
         }
     }
 
+
+    public struct ScrollViewLayoutScope : IDisposable
+    {
+        public static ScrollViewLayoutScope New(ref Vector2 scrollPosition, params GUILayoutOption[] options)
+        {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, options);
+            return new ScrollViewLayoutScope();
+        }
+
+        public static ScrollViewLayoutScope New(ref Vector2 scrollPosition, bool alwaysShowHorizontal, bool alwaysShowVertical, params GUILayoutOption[] options)
+        {
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, alwaysShowHorizontal, alwaysShowVertical, options);
+            return new ScrollViewLayoutScope();
+        }
+
+        void IDisposable.Dispose()
+        {
+            EditorGUILayout.EndScrollView();
+        }
+    }
+
 } // namespace UnityExtensions.Editor
 
 #endif // UNITY_EDITOR

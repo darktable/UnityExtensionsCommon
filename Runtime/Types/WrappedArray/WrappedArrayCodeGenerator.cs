@@ -153,7 +153,7 @@ namespace {nameSpace}
 
             private void OnGUI()
             {
-                using (EditorGUILayoutScrollViewScope.New(ref _scrollPosition))
+                using (ScrollViewLayoutScope.New(ref _scrollPosition))
                 {
                     using (LabelWidthScope.New(position.width * 0.4f))
                     {
