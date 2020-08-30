@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
+using System;
 
 #if UNITY_EDITOR
-using System;
 using UnityEditor;
 using UnityExtensions.Editor;
 #endif
