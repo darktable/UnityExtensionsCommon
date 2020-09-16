@@ -259,6 +259,39 @@ namespace UnityExtensions.Editor
         }
 
 
+        public static bool DrawReferenceDetails(UnityEngine.Object reference, bool foldout, string label, ref UnityEditor.Editor cachedEditor)
+        {
+            if (reference)
+            {
+                var rect = EditorGUILayout.GetControlRect();
+                rect.xMin -= 13;
+
+                foldout = GUI.Toggle(rect, foldout, label, EditorStyles.foldout);
+
+                if (foldout)
+                {
+                    var start = EditorGUILayout.GetControlRect(false, 0f).position;
+
+                    using (IndentLevelScope.New())
+                    {
+                        UnityEditor.Editor.CreateCachedEditor(reference, null, ref cachedEditor);
+                        cachedEditor.OnInspectorGUI();
+                    }
+
+                    var end = EditorGUILayout.GetControlRect(false, 0f).position;
+                    end.y -= 2f;
+
+                    var color = labelNormalColor;
+                    color.a = 0.4f;
+
+                    EditorGUI.DrawRect(new Rect(start.x - 7f, start.y, 2f, end.y - start.y), color);
+                }
+            }
+
+            return foldout;
+        }
+
+
         public static Vector2 SingleLineVector2Field(Rect rect, GUIContent label, Vector2 value, string subLabel1 = "X", string subLabel2 = "Y")
         {
             rect = EditorGUI.PrefixLabel(rect, GUIUtility.GetControlID(label, FocusType.Keyboard, rect), label);
