@@ -741,6 +741,7 @@ namespace UnityExtensions.Editor
                     subField.actualType = type = root?.GetType();
                 }
 
+                if (parent == subFields.Length) value = root;
                 _subFieldsDictionary.Add(id, subFields);
             }
 
